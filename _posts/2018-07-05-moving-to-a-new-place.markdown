@@ -1,33 +1,43 @@
 ---
 layout: post
-title:  Moving to a new place
-date:   2018-07-05 15:01:35 +0300
+title:  타이타닉 데이터 분석 - 생존과 사망에 가장 영향을 미치는 변수는 무엇일까
+date:   2020-09-21
 image:  05.jpg
-tags:   Home
+tags:   Data
 ---
-Yeah, and if you were the pope they'd be all, "Straighten your pope hat." And "Put on your good vestments." Noooooo! Perhaps, but perhaps your civilization is merely the sewer of an even greater society above you!
+### 주제 선정 동기와 탐구 목적
 
-You lived before you met me?! Ow, my spirit! Humans dating robots is sick. __You people wonder why I'm still single?__ *It's 'cause all the fine robot sisters are dating humans!* I guess if you want children beaten, you have to do it yourself.
+* 앞서 동기분들께서 다양한 시각화 자료와 분석으로, 어떤 종류의 승객이 생존 가능성이 높았는지, 예상과 달랐던 흥미로운 결론 등 이미 여러 종류의 blogging을 해주셨다.
+* 이에 따라, 다른 방식의 분석을 시도해보고자 했다.
+* 어떤 종류의 승객이 생존 가능성이 더 높은 지에서 더 나아가, 변수들 중 어떤 변수가 가장 생존율/사망률에 영향을 미치는지 탐구해보고자 했다.
 
-## Are you crazy? I can't swallow that.
 
-Oh, I don't have time for this. I have to go and buy a single piece of fruit with a coupon and then return it, making people wait behind me while I complain. Meh. So, how 'bout them Knicks? Also Zoidberg.
+### 탐구 도구 - Logistic Regression이란?
 
-1. We need rest. The spirit is willing, but the flesh is spongy and bruised.
-2. Fry, we have a crate to deliver.
-3. Have you ever tried just turning off the TV, sitting down with your children, and hitting them?
+일반적으로 종속 변수와 독립 변수의 관계를 분석할 때, 선형회귀분석 방법을 사용한다. 하지만, 이변량 종속 변수(1 또는 0)인 경우, 이러한 선형회귀분석의 적용은 적합하지 않다. 이변량 종속 변수라는 특성을 가지고 있음에도 이를 효과적으로 분석할 수 있는 도구가 로지스틱 회귀 분석(Logistic Regression)이다.
 
-### Why not indeed!
+예를들어, 타이타닉 데이터와 같이 종속 변수(Survived)가 생존 or 사망인 경우에도 사용이 가능하며, 합격 혹은 불합격, 부도 혹은 생존 등의 데이터를 분석하는데도 용이하다.
 
-Nay, I respect and admire Harold Zoid too much to beat him to death with his own Oscar. I don't 'need' to drink. I can quit anytime I want! Soothe us with sweet lies. Bender?! You stole the atom. You don't know how to do any of those.
 
-* Shinier than yours, meatbag.
-* This is the worst part. The calm before the battle.
-* Ooh, name it after me!
+### 분석 과정
 
-Say what? Throw her in the brig. Hey, you add a one and two zeros to that or we walk! You guys aren't Santa! You're not even robots. How dare you lie in front of Jesus? Ow, my spirit! Who's brave enough to fly into something we all keep calling a death sphere?
+먼저, 필요한 라이브러리와 데이터를 불러 온다.
 
-Hey, you add a one and two zeros to that or we walk! You won't have time for sleeping, soldier, not with all the bed making you'll be doing. It's okay, Bender. I like cooking too. Hey, what kinda party is this? There's no booze and only one hooker.
+{% highlight ruby %}
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LogisticRegression             # 로지스틱 회귀분석을 할 수 있는 라이브러리
+from sklearn.model_selection import train_test_split              # 모델 평가를 위한 라이브러리 
+df= pd.read_csv("https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuff/titanic.csv")
+{% endhighlight %}
+
+데이터를 불러왔으면, 어떤 변수를 종속 변수로 두고, 어떤 변수들을 독립 변수로 둘 지 결정한다.
+종속변수는 `Survived`
+독립변수는 `Age` `Pclass` `Fare` `Siblings/Spouses Aboard` `Parents/Children Aboard`
+로 설정했다.
+
+
+
 
 ![]({{ site.baseurl }}/images/07.jpg)
 *Minimalism*
