@@ -1,7 +1,7 @@
 #-------------------------------
 # General Site Settings
 title: yut_a
-logo: logo.svg # You can add own logo.
+logo: # You can add own logo.
 description: Studying Note for Data Science
 
 
