@@ -41,8 +41,22 @@ df= pd.read_csv("https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuf
 
 **_중요한 변수 중 하나인 `Sex` 변수는 male과 femaie을 1과 0의 형태로 나타내어 함께 분석하고자 했으나, 1과 0으로 나타내는 걸 계속 실패해서 함께 분석하지 못했다... (더 공부한 후 보완하도록 하겠습니다!)_**
 
-{% highlight ruby %} # 독립변수 설정
+{% highlight ruby %}
+# 독립변수 설정
 x = df[["Age", "Pclass", "Fare", "Siblings/Spouses Aboard", "Parents/Children Aboard"]]
 # 종속변수 설정
 y = df[["Survived"]]
 {% endhighlight %}
+
+모델의 정확도를 체크하기 위해 test set과 training set으로 구분하고, 정확도를 측정한다.
+
+{% highlight ruby %}
+# training data를 로지스틱 회귀모델에 적용
+log = LogisticRegression()
+log.fit(x_train, y_train)
+
+# 정확도 측정 / %.2f : 소수점 두자리까지 %로 표현
+print('학습용 데이터셋 정확도 : %.2f' % log.score(x_train, y_train))
+print('검증용 데이터셋 정확도 : %.2f' % log.score(x_test, y_test))
+{% endhighlight %}
+
