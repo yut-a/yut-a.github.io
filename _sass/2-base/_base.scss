@@ -82,11 +82,11 @@ blockquote {
 }
 
 pre {
-  overflow: auto;
+  overflow-x: auto;
   padding: 15px;
   margin-bottom: 0;
   font-size: 14px;
-  white-space: pre-wrap;
+  white-space: pre;
   word-wrap: break-word;
   word-break: break-all;
 }
