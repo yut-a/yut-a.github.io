@@ -35,7 +35,7 @@ df= pd.read_csv("https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuf
 
 종속변수는 `Survived`
 
-독립변수는 Age Pclass Fare Siblings/Spouses Aboard Parents/Children Aboard
+독립변수는 Age Pclass Fare Siblings/Spouses Aboard Parents/Children Aboard                  로 설정했다.
 
 로 설정했다.
 
