@@ -66,7 +66,7 @@ A paragraph looks like this — dolor amet cray stumptown fingerstache neutra fo
 
 {% highlight js %}
   $('.top').click(function () {
-    $('html, body').stop().animate({ scrollTop: 0 }, 'slow', 'swing');asadsfdsf,dsmds,vmsmsakfks
+    $('html, body').stop().animate({ scrollTop: 0 }, 'slow', 'swing');
   });
   $(window).scroll(function () {
     if ($(this).scrollTop() > $(window).height()) {
