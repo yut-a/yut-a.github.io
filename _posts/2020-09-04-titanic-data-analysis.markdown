@@ -59,4 +59,4 @@ log.fit(x_train, y_train)
 print('학습용 데이터셋 정확도 : %.2f' % log.score(x_train, y_train))
 print('검증용 데이터셋 정확도 : %.2f' % log.score(x_test, y_test))
 {% endhighlight %}
-
+<img width="216" alt="스크린샷 2020-09-21 오후 9 53 04" src="https://user-images.githubusercontent.com/70478154/93769550-e9041500-fc55-11ea-8623-9d94985a8da5.png">
