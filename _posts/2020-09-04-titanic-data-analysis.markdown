@@ -35,6 +35,9 @@ df= pd.read_csv("https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuf
 
 종속변수는 ```Survived```
 
-독립변수는 Age Pclass Fare Siblings/Spouses Aboard Parents/Children Aboard
+독립변수는 `Age` `Pclass` `Fare` `Siblings/Spouses Aboard` `Parents/Children Aboard`
 
 로 설정했다.
+
+**_중요한 변수 중 하나인 Sex 변수는 male과 femaie을 1과 0의 형태로 나타내어 함께 분석하고자 했으나, 1과 0으로 나타내는 걸 계속 실패해서 함께 분석하지 못했다... (더 공부한 후 보완하도록 하겠습니다!)_**
+
