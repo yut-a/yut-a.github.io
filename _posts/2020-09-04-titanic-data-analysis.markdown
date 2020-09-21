@@ -33,10 +33,8 @@ df= pd.read_csv("https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuf
 
 데이터를 불러왔으면, 어떤 변수를 종속 변수로 두고, 어떤 변수들을 독립 변수로 둘 지 결정한다.
 
-종속변수는 ```Survived```
-
-독립변수는 `Age` `Pclass` `Fare` `Siblings/Spouses Aboard` `Parents/Children Aboard`
-
+종속변수는 ```Survived```<BR/>
+독립변수는 `Age` `Pclass` `Fare` `Siblings/Spouses Aboard` `Parents/Children Aboard`<BR/>
 로 설정했다.
 
 **_중요한 변수 중 하나인 `Sex` 변수는 male과 femaie을 1과 0의 형태로 나타내어 함께 분석하고자 했으나, 1과 0으로 나타내는 걸 계속 실패해서 함께 분석하지 못했다... (더 공부한 후 보완하도록 하겠습니다!)_**
@@ -79,7 +77,7 @@ result.summary2()
 {% endhighlight %}
 <img width="472" alt="스크린샷 2020-09-21 오후 10 06 57" src="https://user-images.githubusercontent.com/70478154/93770185-d63e1000-fc56-11ea-825b-92e20edb2eef.png">
 
-이 결과를 살펴보면, `Parents/Children Abroad` 변수를 제외한 모든 변수들의 P>\|z| 가 0.05보다 작은 것으로 보아 통계적으로 유의함을 알 수 있다. `Parents/Children Abroad` 역시 P>|z|가 0.05보다 작지는 않지만 0.06으로 어느정도 통계적 유의성을 가지고 있다고 판단할 수 있다.
+이 결과를 살펴보면, `Parents/Children Abroad` 변수를 제외한 모든 변수들의 P>\|z\| 가 0.05보다 작은 것으로 보아 통계적으로 유의함을 알 수 있다. `Parents/Children Abroad` 역시 P>\|z\|가 0.05보다 작지는 않지만 0.06으로 어느정도 통계적 유의성을 가지고 있다고 판단할 수 있다.
 
 Coef는 각 변수가 종속변수에 영향을 미치는 민감도로, 회귀 모델에서 계수이다. 즉, `Age`의 경우 종속변수와 음의 상관관계가 있으며, `Age` 변수의 1단위 변화에 따라 -0.0132만큼 종속변수에 영향을 미치는 것이다.
 
@@ -87,10 +85,7 @@ Coef는 각 변수가 종속변수에 영향을 미치는 민감도로, 회귀 �
 **이를 종합해 분석을 하면,**
 
 `Age` 변수는 종속변수와 음의 상관관계를 가지며, 나이가 어릴수록 생존율 상승에 기인한다.<BR/>
-`Pclass` 변수는 종속변수와 음의 상관관계를 가지며, 등급이 높은 방일수록 생존율 상승에 기인한다.
-
-`Fare` 변수는 종속변수와 양의 상관관계를 가지며, 지불 금액이 클수록 생존률 상승에 기인한다.
-
-`Siblinggs/Spouses Abroad` 변수는 종속변수와 음의 상관관계를 가지며, 형제/자매 수가 작을수록,
-
+`Pclass` 변수는 종속변수와 음의 상관관계를 가지며, 등급이 높은 방일수록 생존율 상승에 기인한다.<BR/>
+`Fare` 변수는 종속변수와 양의 상관관계를 가지며, 지불 금액이 클수록 생존률 상승에 기인한다.<BR/>
+`Siblinggs/Spouses Abroad` 변수는 종속변수와 음의 상관관계를 가지며, 형제/자매 수가 작을수록,<BR/>
 `Parents/Children Abroad` 변수는 종속변수와 양의 상관관계를 가지며, 부모/자식이 많을수록 생존율 상승에 기인한다.
