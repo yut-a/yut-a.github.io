@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  타이타닉 데이터 분석 - 생존과 사망에 가장 영향을 미치는 변수는 무엇일까
-date:   2020-09-21
+date:   2020-09-04
 image:  05.jpg
 tags:   Data
 ---
@@ -33,7 +33,7 @@ df= pd.read_csv("https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuf
 
 데이터를 불러왔으면, 어떤 변수를 종속 변수로 두고, 어떤 변수들을 독립 변수로 둘 지 결정한다.
 
-종속변수는 `Survived`
+종속변수는 ```Survived```
 
 독립변수는 Age Pclass Fare Siblings/Spouses Aboard Parents/Children Aboard
 
