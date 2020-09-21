@@ -29,7 +29,7 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression             # 로지스틱 회귀분석을 할 수 있는 라이브러리
 from sklearn.model_selection import train_test_split              # 모델 평가를 위한 라이브러리 
 df= pd.read_csv("https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuff/titanic.csv")
-{% endhighlight %}
+```
 
 데이터를 불러왔으면, 어떤 변수를 종속 변수로 두고, 어떤 변수들을 독립 변수로 둘 지 결정한다.
 
