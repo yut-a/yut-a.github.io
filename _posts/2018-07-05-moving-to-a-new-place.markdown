@@ -23,7 +23,7 @@ tags:   Data
 
 먼저, 필요한 라이브러리와 데이터를 불러 온다.
 
-{% highlight py %}
+{% highlight ruby %}
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression             # 로지스틱 회귀분석을 할 수 있는 라이브러리
