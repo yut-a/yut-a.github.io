@@ -89,10 +89,6 @@ pre {
   white-space: pre-wrap;
   word-wrap: break-word;
   word-break: break-all;
-	.hljs {
-   		 white-space: pre;
-   		 overflow-x: auto;
-	}
 }
 
 img,
@@ -128,4 +124,9 @@ hr {
   margin: 40px 0;
   border: 0;
   background: $light-gray;
+}
+
+.hljs {
+    white-space: pre;
+    overflow-x: auto;
 }
