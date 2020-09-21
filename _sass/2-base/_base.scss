@@ -87,8 +87,8 @@ pre {
   margin-bottom: 0;
   font-size: 14px;
   white-space: pre-wrap;
-  word-wrap: normal;
-  word-break: break-all;
+  word-wrap: break-word;
+  word-break: keep-all;
 }
 
 img,
