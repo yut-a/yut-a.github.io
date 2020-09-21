@@ -81,14 +81,18 @@ blockquote {
   }
 }
 
-pre {
-  overflow-x: auto;
+pre {	
+  overflow: auto;
   padding: 15px;
   margin-bottom: 0;
   font-size: 14px;
-  white-space: pre;
+  white-space: pre-wrap;
   word-wrap: break-word;
   word-break: break-all;
+	.hljs {
+   		 white-space: pre;
+   		 overflow-x: auto;
+	}
 }
 
 img,
