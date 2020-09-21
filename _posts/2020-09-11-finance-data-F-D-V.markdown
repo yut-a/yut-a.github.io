@@ -15,7 +15,7 @@ tags:   Data
 
 `Kospi 200 ETF` `골드 ETF` `신풍제약` 주식 데이터 를 활용했다.
 
-**ETF란?**
+**ETF란?**<BR/>
 Exchange Traded Fund의 약자로, 특정 주가지수를 주식처럼 거래가 가능하며, 특정 주가지수의 움직임에 따라 수익률이 결정되는 금융 상품이다.<BR/>
 예를 들어, Kospi200 지수가 3% 올랐다고 가정하면, Kospi200 지수 자체를 주식처럼 거래할 수 없기 때문에 Kospi200 지수처럼 움직이는 상품을 거래할 수 있도록 만들어 놓은 것이 Kospi200 ETF이다.<BR/><BR/><BR/><BR/>
 
@@ -41,7 +41,7 @@ kospi200.head()
 {% endhighlight %}
 <img width="796" alt="스크린샷 2020-09-22 오전 12 17 53" src="https://user-images.githubusercontent.com/70478154/93785516-21f9b500-fc69-11ea-8894-0b5af4095262.png">
 
-그래서 header를 잘 정리하고, 칼럼 명을 설정한 후 필요없는 column들을 삭제했다.
+그래서 header를 잘 정리하고, 칼럼 명을 설정한 후 필요없는 column들을 삭제했다.<BR/><BR/><BR/>
 
 **간단하게 column들을 소개하자면,**
 
@@ -99,10 +99,10 @@ def data_manip(data):
 gold = data_manip(gold)
 shinpoong = data_manip(shinpoong)
 {% endhighlight %}
-**골드 ETF**
+**골드 ETF**<BR/>
 <img width="396" alt="스크린샷 2020-09-22 오전 12 22 58" src="https://user-images.githubusercontent.com/70478154/93786079-d562a980-fc69-11ea-83f8-dce19d1cc111.png">
 
-**신풍제약**
+**신풍제약**<BR/>
 <img width="384" alt="스크린샷 2020-09-22 오전 12 23 42" src="https://user-images.githubusercontent.com/70478154/93786228-04791b00-fc6a-11ea-9976-aa0605aee945.png">
 
 어느 정도 데이터 정리를 마무리 한 후, 각 종목의 가격 데이터를 날짜 별로 한 눈에 비교하기 위해 **inner join**을 하고자 한다. 먼저, inner join 후 혼란을 방지하고자 칼럼 명을 다음과 같이 변경했다. 이러한 과정을 거친 후, `date` 칼럼을 기준으로 inner join을 했다.
@@ -178,7 +178,7 @@ ax.set_xticks(ax.get_xticks()[::2])       # x축 간격 설정
 
 위의 **KOSPI200 vs GOLD 그래프**를 보면, 세 가지 시점으로 나누어 분석해 볼 수 있다.
 
-1. ~2020-03
+1. **~2020-03**<BR/>
 코로나 바이러스가 대유행이 되어 급격하게 확진자가 늘어나는 시점 2020년 3월 초까지는 일반적으로 알려진 선호에 따라, 위험자산으로 분류할 수 있는 kospi200 ETF는 하락하는 반면, 안전자산으로 분류할 수 있는 골드 ETF는 점차적으로 상승하는 모습을 볼 수 있다.
 
 
