@@ -33,10 +33,8 @@ df= pd.read_csv("https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuf
 
 데이터를 불러왔으면, 어떤 변수를 종속 변수로 두고, 어떤 변수들을 독립 변수로 둘 지 결정한다.
 
-종속변수는 `Survived`
-
-독립변수는 <Age> `Pclass` `Fare` `Siblings/Spouses Aboard` `Parents/Children Aboard`
-
+종속변수는 Survived
+독립변수는 Age Pclass Fare Siblings/Spouses Aboard Parents/Children Aboard
 로 설정했다.
 
 
