@@ -60,3 +60,14 @@ print('학습용 데이터셋 정확도 : %.2f' % log.score(x_train, y_train))
 print('검증용 데이터셋 정확도 : %.2f' % log.score(x_test, y_test))
 {% endhighlight %}
 <img width="216" alt="스크린샷 2020-09-21 오후 9 53 04" src="https://user-images.githubusercontent.com/70478154/93769550-e9041500-fc55-11ea-8623-9d94985a8da5.png">
+
+{% highlight ruby %}
+# 모델의 정밀도, 재현율 등을 보여줌
+from sklearn.metrics import classification_report
+y_pred = log.predict(x_test)
+print(classification_report(y_test, y_pred))
+{% endhighlight %}
+<img width="464" alt="스크린샷 2020-09-21 오후 10 04 02" src="https://user-images.githubusercontent.com/70478154/93769882-6cbe0180-fc56-11ea-8bfb-9570b2172405.png">
+
+위의 결과에 따르면, 정확도와 정밀도, 재현율 모두 0.7정도인 것을 확인할 수 있다.
+정확도가 많이 높지는 않지만, 정확성이 어느정도 있다고 판단을 하고, 독립 변수들이 종속 변수에 어떻게 영향을 미치는지 알아본다.
