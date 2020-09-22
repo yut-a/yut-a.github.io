@@ -3,7 +3,7 @@ layout: post
 title:  금융 데이터를 활용한 Feature Engineering, Data Manipuation, Visualizaiton
 date:   2020-09-11
 image:  stock.jpg
-tags:   Data finance
+tags:   Data Finance
 ---
 ## Feature Engineering, Data Manipuation, Visualizaiton이 필요한 이유
 
