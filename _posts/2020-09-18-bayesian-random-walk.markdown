@@ -3,7 +3,7 @@ layout: post
 title:  Bayesian을 통해 알아본 주식 시장의 Random Walk
 date:   2020-09-18
 image:  risk.jpg
-tags:   Data finance
+tags:   Data Finance
 ---
 ## Bayesian 이란?
 
