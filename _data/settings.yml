@@ -10,7 +10,7 @@ description: Studying Note for Data Science
 author:
   name: yut_a
   image: finance.jpg
-  say-hello: This is my<BR/><strong>Studying Note for Data Science</strong>
+  say-hello: <strong>Studying Note<BR/>For Data Science</strong>
 #   bio: This is my <strong>Studying Note for Data Science</strong>
 
 
