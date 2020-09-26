@@ -1,5 +1,5 @@
 baseurl: "/fun" # the subpath of your site, e.g. /blog
-url: "https://yut-a.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://yut-a.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 
 
 # Build settings
