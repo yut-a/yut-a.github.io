@@ -175,7 +175,7 @@ print("\npc2:\n-----\n", pc2_rank.sort_values().head(6))
 {% endhighlight %}
 <img width="234" alt="스크린샷 2020-09-27 오후 11 38 32" src="https://user-images.githubusercontent.com/70478154/94367582-98d7f780-011a-11eb-90bf-43428c0c4058.png">
 
-위의 데이터는 이전에 산출한 고유벡터를 각 PC별로 절대값이 큰 순서로 순위를 매긴 것이다. 즉, 높은 순위일수록 해당 PC에 큰 영향을 준다는 의미이다. PC1은 주로 `은행` 관련 종목들이 많은 영향을 준다는 것을 확인할 수 있다. PC2는 `LG` 계열사 종목들이 많인 영향을 준다는 것을 알 수 있다.
+위의 데이터는 이전에 산출한 고유벡터를 각 PC별로 절대값이 큰 순서로 순위를 매긴 것이다. 즉, 높은 순위일수록 해당 PC에 큰 영향을 준다는 의미이다. PC1은 주로 `은행` 관련 종목들이 많은 영향을 준다는 것을 확인할 수 있다. PC2는 `LG` 계열사 종목들이 많 영향을 준다는 것을 알 수 있다.
 
 {% highlight ruby %}
 # PC3/PC4 특성 확인
@@ -201,7 +201,7 @@ bank = pd.read_csv("bank.csv", skiprows = 3, engine = "python")
 bank["코스피 은행"]
 {% endhighlight %}
 
-Kospi50 동일가중 지수와 Kospi 은행 지수 데이터를 불러와 시계열 그래프를 비교했다.
+Kospi50 동일가중 지수와 Kospi 은행 지수 데이터를 불러와 시계열 그래프를 비교했다. PC1은 두 데이터와 음의 상관관계를 가지고 있기 때문에 y축 데이터의 흐름이 반대로 되어 있다. 따라서, y축을 뒤집어 그래프를 나타냈다.
 
 {% highlight ruby %}
 # Kospi50 동일가중 지수 시각화
@@ -216,7 +216,7 @@ plt.ylabel("Kospi50");
 plt.scatter(kospi50_all["date"], projec["PC1"])
 plt.xlabel("date")
 plt.ylabel("PC1")
-plt.gca().invert_yaxis();
+plt.gca().invert_yaxis();         # y축 inverse
 {% endhighlight %}
 <img width="397" alt="스크린샷 2020-09-28 오전 12 04 06" src="https://user-images.githubusercontent.com/70478154/94368280-2e28bb00-011e-11eb-966c-10136086fe0f.png">
 
@@ -228,7 +228,11 @@ plt.ylabel("Kospi bank");
 {% endhighlight %}
 <img width="399" alt="스크린샷 2020-09-28 오전 12 06 10" src="https://user-images.githubusercontent.com/70478154/94368322-734ced00-011e-11eb-8e49-cf87cd4fdc36.png">
 
-Kospi50 동일가중 지수와 PC1의 시계열 추이가 비슷하게 나타나는 것을 확인할 수 있다. 이를 통해,
+Kospi50 동일가중 지수와 PC1의 시계열 추이가 비슷하게 나타나는 것을 확인할 수 있다. 이를 통해, PC1이 어느 정도 전체 데이터를 설명할 수 있음을 알 수 있다. 또한, `은행` 관련 종목들이 많은 영향을 주는 PC1과 Kospi 은행 지수가 매우 닮아있다는 것을 확인할 수 있다. 이를 통해, 전체 데이터의 주성분 중 하나인 PC1이 `은행` 관련 종목을 대표한다고 이야기 할 수 있다.<BR/><BR/><BR/><BR/>
+
+## 결론
+
+
 
 
 
