@@ -107,7 +107,8 @@ cumvals
 {% endhighlight %}
 <img width="578" alt="스크린샷 2020-09-27 오후 11 12 39" src="https://user-images.githubusercontent.com/70478154/94367059-ff5b1680-0116-11eb-9c54-6200dfe97067.png">
 
-누적 기여율은 각 PC(주성분)들이 전체 데이터를 설명할 수 있는 비율이라고 할 수 있다. 즉, PC1은 전체 데이터의 약 58.46%를 설명하고, PC1과 PC2는 약 76.92%를 설명한다.<BR/>
+누적 기여율은 각 PC(주성분)들이 전체 데이터를 설명할 수 있는 비율이라고 할 수 있다. 즉, PC1은 전체 데이터의 약 58.46%를 설명하고, PC1과 PC2는 약 76.92%를 설명한다.
+
 몇 차원으로 축소할 것인지를 결정하기 위해 Scree plot을 통해 누적기여율을 시각화했다. 효과적인 시각화를 위해 6개의 PC만 선택했다.
 
 {% highlight ruby %}
@@ -199,6 +200,39 @@ kospi50_index = pd.DataFrame(kospi50_index)
 bank = pd.read_csv("bank.csv", skiprows = 3, engine = "python")
 bank["코스피 은행"]
 {% endhighlight %}
+
+Kospi50 동일가중 지수와 Kospi 은행 지수 데이터를 불러와 시계열 그래프를 비교했다.
+
+{% highlight ruby %}
+# Kospi50 동일가중 지수 시각화
+plt.scatter(kospi50_all["date"], kospi50_all["코스피 50 동일가중"])
+plt.xlabel("date")
+plt.ylabel("Kospi50");
+{% endhighlight %}
+<img width="406" alt="스크린샷 2020-09-28 오전 12 03 07" src="https://user-images.githubusercontent.com/70478154/94368265-118c8300-011e-11eb-875a-66c45af40f3f.png">
+
+{% highlight ruby %}
+# PC1 시각화
+plt.scatter(kospi50_all["date"], projec["PC1"])
+plt.xlabel("date")
+plt.ylabel("PC1")
+plt.gca().invert_yaxis();
+{% endhighlight %}
+<img width="397" alt="스크린샷 2020-09-28 오전 12 04 06" src="https://user-images.githubusercontent.com/70478154/94368280-2e28bb00-011e-11eb-966c-10136086fe0f.png">
+
+{% highlight ruby %}
+# Kospi 은행 시각화
+plt.scatter(kospi50_all["date"], bank["코스피 은행"])
+plt.xlabel("date")
+plt.ylabel("Kospi bank");
+{% endhighlight %}
+<img width="399" alt="스크린샷 2020-09-28 오전 12 06 10" src="https://user-images.githubusercontent.com/70478154/94368322-734ced00-011e-11eb-8e49-cf87cd4fdc36.png">
+
+Kospi50 동일가중 지수와 PC1의 시계열 추이가 비슷하게 나타나는 것을 확인할 수 있다. 이를 통해,
+
+
+
+
 
 
 
