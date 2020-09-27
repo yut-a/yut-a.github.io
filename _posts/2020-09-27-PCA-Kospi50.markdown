@@ -85,3 +85,68 @@ for i in range(0, len(kospi50.columns)):
 kospi50 = kospi50.astype(np.int64)
 kospi50.dtypes
 {% endhighlight %}
+<img width="1121" alt="스크린샷 2020-09-27 오후 11 08 37" src="https://user-images.githubusercontent.com/70478154/94366995-8b207300-0116-11eb-8358-0fd844a6bd03.png">
+
+정리가 된 50개 종목의 주가 데이터를 바탕으로 PCA를 진행했다.
+
+{% highlight ruby %}
+# PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+scaler = StandardScaler()
+standard = scaler.fit_transform(kospi50)       # Standardized
+
+pca = PCA()
+pca.fit(standard)
+
+vals = pca.explained_variance_ratio_           # 분산 비율
+cumvals = np.cumsum(vals)                      # 누적 분산 비율(누적 기여율)
+cumvals
+{% endhighlight %}
+<img width="578" alt="스크린샷 2020-09-27 오후 11 12 39" src="https://user-images.githubusercontent.com/70478154/94367059-ff5b1680-0116-11eb-9c54-6200dfe97067.png">
+
+누적 기여율은 각 PC(주성분)들이 전체 데이터를 설명할 수 있는 비율이라고 할 수 있다. 즉, PC1은 전체 데이터의 약 58.46%를 설명하고, PC1과 PC2는 약 76.92%를 설명한다.<BR/>
+몇 차원으로 축소할 것인지를 결정하기 위해 Scree plot을 통해 누적기여율을 시각화했다. 효과적인 시각화를 위해 6개의 PC만 선택했다.
+
+{% highlight ruby %}
+# Scree plot을 통한 시각화 - 6개의 PC만
+
+import matplotlib.pyplot as plt
+
+num = 6
+count = np.arange(num) + 1
+
+# 분산 비율, 누적 분산 비율 그리기 
+plt.figure(figsize = (6, 6))
+ax = plt.subplot()
+plt.bar(count, vals[:6], color = "#a29bfe")
+plt.plot(count, cumvals[:6], color = "#fdcb6e", marker = "*")
+
+# 분산 비율 그래프에 삽입
+for i in range(num):
+  ax.annotate(str(np.round(vals[i] * 100, 2)) + "%",
+              (count[i], vals[i]),
+              va = "bottom",
+              ha = "center",
+              fontsize = 10)
+
+# 누적 분산 비율 그래프에 삽입
+for i in range(1, 6):
+  ax.annotate(str(np.round(cumvals[i] * 100, 2)) + "%",
+              (count[i], cumvals[i]),
+              va = "bottom",
+              ha = "center",
+              fontsize = "9",
+              color = "gray")
+
+ax.set_xlabel("PCs")
+ax.set_ylabel("Variance rate");
+{% endhighlight %}
+<img width="385" alt="스크린샷 2020-09-27 오후 11 21 22" src="https://user-images.githubusercontent.com/70478154/94367212-341b9d80-0118-11eb-87fc-e85e9840011a.png">
+
+
+
+
+
+
