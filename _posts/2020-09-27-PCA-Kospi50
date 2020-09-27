@@ -1,0 +1,10 @@
+---
+layout: post
+title:  PCA를 통한 KOSPI 50 종목들의 주가 데이터 차원 축소
+date:   2020-09-27
+image:  dimension.jpg
+tags:   Data Finance
+---
+## PCA 란?
+
+`PCA(Principal Component Analysis)`는 데이터의 분산(Variance)을 최대한 보존하면서 서로 직교하는 새 기저를 찾아, 고차원의 표본들을 선형 연관성이 없는 저차원 공간으로 변환하는 기법이다. PCA는 기존 변수를 조합해 새로운 변수를 만드는 기법인 변수추출 방법을 따른다. 그 중, 기존 변수 가운떼 일부만 활용하는 방식이 있고, 모두 쓰는 방식이 있는데 PCA는 후자에 해당한다. PCA는 기존 변수를 선형결합해 새로운 변수를 만들어낸다.
