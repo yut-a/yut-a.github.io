@@ -22,4 +22,66 @@ tags:   Data Finance
 
 `Kospi50 구성 종목 50개의 개별 주가`의 2019년 2월 13일부터 2020년 9월 25일 데이터를 활용했다.<BR/>
 * `현대건설`, `삼성전기`, `LG유플러스`는 2019년 6월 14일 이후로 Kospi50에 편입되었지만, 편입되지 않았던 기간이 전체 기간 중 매우 많은 비중을 차지하지 않으며, Kospi50 지수 데이터는 단순한 비교의 목적으로 활용했기 때문에 이 세 종목들 역시 2019년 2월 13일부터 데이터를 활용했다.
-* 2020년 9월 11일에 편입된 `SK바이오팜`은 최근에 상장되었기 때문에 현재까지 데이터가 매우 적어, 이전의 Kospi50 편입 종목이었던 `한미사이언스` 데이터를 활용했다.
+* 2020년 9월 11일에 편입된 `SK바이오팜`은 최근에 상장되었기 때문에 현재까지 데이터가 매우 적어, 이전의 Kospi50 편입 종목이었던 `한미사이언스` 데이터를 활용했다.<BR/><BR/><BR/><BR/>
+
+## 적용 과정
+
+필요한 데이터를 불러와 header를 정리했다.
+
+{% highlight ruby %}
+from google.colab import files
+uploaded = files.upload()
+
+# 데이터 불러오기
+import pandas as pd
+
+stock_1 = pd.read_csv("stock_1.csv", skiprows = 3, engine = "python")
+stock_2 = pd.read_csv("stock_2.csv", skiprows = 3, engine = "python")
+stock_3 = pd.read_csv("stock_3.csv", skiprows = 3, engine = "python")
+stock_4 = pd.read_csv("stock_4.csv", skiprows = 3, engine = "python")
+{% endhighlight %}
+
+불러온 데이터에 대한 전처리를 진행하고 데이터들을 병합했다.
+
+{% highlight ruby %}
+# 필요없는 칼럼 삭제
+col_1 = stock_1.columns[16:]
+col_2 = stock_2.columns[16:]
+col_3 = stock_3.columns[16:]
+col_4 = stock_4.columns[7:]
+
+stock_1 = stock_1.drop(col_1, axis = 1)
+stock_2 = stock_2.drop(col_2, axis = 1)
+stock_3 = stock_3.drop(col_3, axis = 1)
+stock_4 = stock_4.drop(col_4, axis = 1)
+
+# 첫번 째 칼럼 명 재설정 및 데이터 병합
+stock_1.rename(columns = {"Unnamed: 0" : "date"}, inplace = True)
+stock_2.rename(columns = {"Unnamed: 0" : "date"}, inplace = True)
+stock_3.rename(columns = {"Unnamed: 0" : "date"}, inplace = True)
+stock_4.rename(columns = {"Unnamed: 0" : "date"}, inplace = True)
+
+kospi50_all = pd.merge(stock_1, stock_2, on = "date", how = "inner")
+kospi50_all = pd.merge(kospi50_all, stock_3, on = "date", how = "inner")
+kospi50_all = pd.merge(kospi50_all, stock_4, on = "date", how = "inner")
+
+# 결측치 제거
+kospi50_all = kospi50_all.dropna(axis = 0)
+kospi50_all = kospi50_all.reset_index(drop = False)
+kospi50_all = kospi50_all.drop("index", axis = 1)
+
+# date, 코스피 50 동일가중 칼럼 분리
+kospi50 = kospi50_all.drop(["date","코스피 50 동일가중"], axis = 1)
+{% endhighlight %}
+
+PCA, 시각화를 통한 비교 등을 위해 데이터들을 숫자형으로 변환했다.
+
+{% highlight ruby %}
+# 숫자형 변환을 위한 , 제거
+for i in range(0, len(kospi50.columns)):
+  kospi50.iloc[:,i] = kospi50.iloc[:,i].str.replace(",", "")
+
+# 숫자형 변환
+kospi50 = kospi50.astype(np.int64)
+kospi50.dtypes
+{% endhighlight %}
