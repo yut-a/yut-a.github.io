@@ -169,5 +169,20 @@ def stock_info(stock_code = ""):
     return data
 {% endhighlight %}
 
+`삼성전자`의 종목 코드를 통해 재무 비율을 잘 불러오는 것을 확인할 수 있다.
+
+{% highlight ruby %}
+# 삼성전자 재무 비율
+stock_info("A005930").head()
+{% endhighlight %}
+<img width="396" alt="스크린샷 2020-10-01 오후 1 38 34" src="https://user-images.githubusercontent.com/70478154/94768841-80523080-03eb-11eb-8998-962558447883.png">
+
+이번엔 `삼성증권`의 종목 코드를 입력해보자. 다른 종목의 재무 비율 역시 잘 불러오는 것을 확인할 수 있다.
+
+{% highlight ruby %}
+# 삼성증권 재무 비율
+stock_info("A016360")
+{% endhighlight %}
+<img width="426" alt="스크린샷 2020-10-01 오후 1 38 50" src="https://user-images.githubusercontent.com/70478154/94768864-906a1000-03eb-11eb-9501-9a5cdd0fb6d7.png">
 
 
