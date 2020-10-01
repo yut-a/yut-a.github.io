@@ -50,7 +50,7 @@ stock_code = "A005930"
 url = "http://comp.fnguide.com/SVO2/ASP/SVD_FinanceRatio.asp?pGB=1&gicode=" + stock_code + "&cID=&MenuYn=Y&ReportGB=&NewMenuID=104&stkGb=701"
 {% endhighlight %}
 
-필요한 라이브러리들을 불러온 후, `urlopen`을 이용하여 url의 소스코드를 긁어온다. 긁어온 소스코드를 보기 좋게 해석하기 위해, `BeautifulSoup`를 이용하여 해석한다.
+필요한 라이브러리들을 불러온 후, `urlopen`을 이용하여 url의 소스코드를 긁어온다. 긁어온 소스코드를 보기 좋게 해석하기 위해, `BeautifulSoup`를 이용한다.
 
 {% highlight ruby %}
 from urllib.request import urlopen
@@ -63,3 +63,7 @@ source = urlopen(url).read()                  # url의 소스코드 긁어오기
 source = bs4.BeautifulSoup(source, "lxml")    # 소스코드 해석
 {% endhighlight %}
 
+웹사이트에서 크롤링하기를 원하는 부분의 구조를 파악하기 위해 `검사`를 클릭한다.
+<img width="1438" alt="스크린샷 2020-10-01 오후 12 10 12" src="https://user-images.githubusercontent.com/70478154/94761473-184a1d00-03e0-11eb-8680-831b29d6c1aa.png">
+
+확인한 결과, 다음과 같은 
