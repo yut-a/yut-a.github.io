@@ -183,6 +183,8 @@ stock_info("A005930").head()
 # 삼성증권 재무 비율
 stock_info("A016360")
 {% endhighlight %}
-<img width="426" alt="스크린샷 2020-10-01 오후 1 38 50" src="https://user-images.githubusercontent.com/70478154/94768864-906a1000-03eb-11eb-9501-9a5cdd0fb6d7.png">
+<img width="426" alt="스크린샷 2020-10-01 오후 1 38 50" src="https://user-images.githubusercontent.com/70478154/94768864-906a1000-03eb-11eb-9501-9a5cdd0fb6d7.png"><BR/><BR/><BR/><BR/>
 
+## 정리
 
+`BeautifulSoup`를 활용하여 웹 사이트의 원하는 데이터를 가져와 보았다. 이 라이브러리 외에도 활용 가능한 라이브러리가 많기 때문에 적용하기 편리한 방식을 사용하는 것이 좋다. 사실 이 코드는 전혀 만능이 아니다. 다른 웹 사이트에는 적용할 수 없는 일회용 코드일 뿐이다. 하지만, 필요한 데이터가 `csv`나 `xlsx` 등으로 정리되어 있지 않고, 지속적으로 데이터를 추출할 필요가 있는 경우에 코드를 작성한다면 매우 유용할 것이라 생각한다.
