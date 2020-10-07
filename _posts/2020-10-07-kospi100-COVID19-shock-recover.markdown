@@ -316,7 +316,7 @@ today_list.head()
 {% endhighlight %}
 <img width="242" alt="스크린샷 2020-10-08 오전 12 38 31" src="https://user-images.githubusercontent.com/70478154/95353787-a2254900-08fe-11eb-8cc5-e15ffb3315d5.png">
 
-**분석 적용**
+**PCA와 K-Means**
 
 필요한 데이터들을 불러와 전처리를 완료했다. 78개 종목 별 `주요 재무비율` `2020-02-03 ~ 2020-04-17 종가` `2020-10-06 종가` 데이터로 정리했다.
 
@@ -426,7 +426,91 @@ eigen_vec
 {% endhighlight %}
 <img width="347" alt="스크린샷 2020-10-08 오전 1 20 56" src="https://user-images.githubusercontent.com/70478154/95359232-e287c580-0904-11eb-9eaf-06088b4911c8.png">
 
-위의 결과에 따르면,
+위의 결과에 따르면, PC1에 가장 많은 영향을 주는 것은 `유동비율` `당좌비율` `부채비율` `자기자본비율`임을 알 수 있다. 즉, PC1은 **안정성 지표**와 관련이 크다고 할 수 있다. `유동비율` `당좌비율` `자기자본비율`이 PC1과 양의 상관관계를, `부채비율`이 음의 상관관계를 나타내는 것으로 보아, **PC1이 클수록 안정성 지표가 좋다**고 할 수 있다.
+
+PC2에 가장 많은 영향을 주는 것은 `매출액증가율` `영업이익증가율` `EBITDA증가율`임을 알 수 있다. 즉, PC2는 **성장성 지표**와 관련이 크다고 할 수 있다. `매출액증가율` `영업이익증가율` `EBITDA증가율`이 PC2와 음의 상관관계를 나타내는 것으로 보아, **PC2가 작을수록 성장성 지표가 좋다**고 할 수 있다.
+
+PC3에 가장 많은 영향을 주는 것은 `ROA` `ROE`임을 알 수 있다. 즉, PC3는 **수익성 지표**와 관련이 크다고 할 수 있다. `ROA` `ROE`가 PC3와 음의 상관관계를 나타내는 것으로 보아, **PC3이 작을수록 수익성 지표가 좋다**고 할 수 있다.
+
+다음은, 각 PC에 대한 종목들의 Projected data를 산출했다. 즉, 각 종목에 대한 PC1, PC2, PC3로 이루어진 점이 원본 주요 재무비율을 설명할 수 있는 것이다.
+
+{% highlight ruby %}
+# Projected data
+projec = pca.transform(standard)
+projec = pd.DataFrame(projec, columns = ["PC1", "PC2", "PC3"])
+finance_index = finance["종목명"].tolist()
+projec.insert(0, "종목명", finance_index)
+projec
+{% endhighlight %}
+<img width="383" alt="스크린샷 2020-10-08 오전 1 41 09" src="https://user-images.githubusercontent.com/70478154/95361195-62af2a80-0907-11eb-8412-8d699d2a5846.png">
+
+PCA 결과를 바탕으로, 각 종목들을 안정성, 성장성, 수익성 등 특성에 따라 묶기 위해 K-Means clustering을 진행했다.
+
+{% highlight ruby %}
+# parameter 선택
+sum_of_squared_distances = []
+K = range(1,15)
+for k in K:
+    km = KMeans(n_clusters=k)
+    km = km.fit(projec_data)
+    sum_of_squared_distances.append(km.inertia_)
+
+plt.plot(K, sum_of_squared_distances, 'bx-')
+plt.xlabel('k')
+plt.ylabel('Sum_of_squared_distances')
+plt.title('Elbow Method For Optimal k')
+plt.show()
+{% endhighlight %}
+<img width="397" alt="스크린샷 2020-10-08 오전 1 58 56" src="https://user-images.githubusercontent.com/70478154/95363020-de11db80-0909-11eb-8101-2024dd5841be.png">
+
+그래프에 따르면, k=3부터 하락폭이 완만하게 줄어들기 때문에 클러스터 수를 3으로 설정했다. 물론 보는 사람에 따라 다를 수 있기 때문에 스스로 알맞게 판단하는 것이 좋다. 
+
+{% highlight ruby %}
+# K-Means를 위한 label 제거
+projec_data = projec.drop(["종목명"], axis = 1)
+
+# K-Means
+from sklearn.cluster import KMeans
+kmeans_pca = KMeans(n_clusters = 3, random_state = 0)
+kmeans_pca.fit(projec_data)
+labels_pca = kmeans_pca.labels_
+
+pca_data = pd.Series(labels_pca)
+projec_data_cluster = projec_data.copy()
+projec_data_cluster["clusters"] = pca_data.values
+
+projec_data_cluster.head()
+{% endhighlight %}
+<img width="352" alt="스크린샷 2020-10-08 오전 2 01 49" src="https://user-images.githubusercontent.com/70478154/95363314-43fe6300-090a-11eb-987c-a5390fa6e2f2.png">
+
+clustering 결과를 바탕으로, PC1, PC2, PC3를 두 개씩 묶어 scatter plot으로 시각화했다. clustering한 PC1과 PC2 그래프를 보면, 0, 1, 2로 잘 분류된 것을 확인할 수 있다. 해석하면, `0`은 **안정성과 성장성이 모두 낮은 종목**, `1`은 **안정성이 높은 종목**, `2`는 **성장성이 높은 종목**이라고 할 수 있다.
+
+반면, clustering한 PC3과 PC1, PC3과 PC2 그래프를 보면, cluster에 상관 없이 모여있는 것을 확인할 수 있다.
+
+{% highlight ruby %}
+# cluster 시각화 (PC1 / PC2)
+import seaborn as sns
+sns.scatterplot(x = "PC1", y = "PC2", hue = "clusters", data = projec_data_cluster);
+{% endhighlight %}
+<img width="386" alt="스크린샷 2020-10-08 오전 2 21 01" src="https://user-images.githubusercontent.com/70478154/95365350-fb947480-090c-11eb-948b-47bddb4a9f53.png">
+
+{% highlight ruby %}
+# cluster 시각화 (PC3 / PC1)
+import matplotlib.pyplot as plt
+plt.subplot(211)
+sns.scatterplot(x = "PC3", y = "PC1", hue = "clusters", data = projec_data_cluster)
+
+# cluster 시각화 (PC3 / PC2)
+plt.subplot(212)
+sns.scatterplot(x = "PC3", y = "PC2", hue = "clusters", data = projec_data_cluster);
+{% endhighlight %}
+<img width="398" alt="스크린샷 2020-10-08 오전 2 22 05" src="https://user-images.githubusercontent.com/70478154/95365445-19fa7000-090d-11eb-9a60-715dc38f495f.png">
+
+따라서, PC1과 PC2의 cluster를 중심으로 코로나 19에 따른 충격과 회복에 대한 분석을 실시하고자 한다.
+
+**분석 적용**
+
+
 
 
 
