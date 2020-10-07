@@ -32,7 +32,79 @@ tags:   Data Finance
 * `ROA` : (당기순이익 / 총자산) * 100으로 산출하며, 총자산순이익률이라고 한다. 총자산에서 이익을 얼마나 올렸는지 측정하는 지표로, 자산을 얼마나 효율적으로 운용했는지를 의미하기도 한다.
 * `ROE` : 일반적으로 (당기순이익 / 총자본) * 100으로 산출하여, 자기자본이익률이라고 한다. 총자본에서 이익을 얼마나 올렸는지 측정하는 지표로, 자본을 얼마나 효율적으로 운용했는지를 의미하기도 한다. 이 데이터에서는 (지배주주순이익 / 지배주주지분) * 100으로 산출했다. 간단하게 말하면, 모회사가 가진 자회사 지분만큼 당기순이익에 반영한 수치이다.
 
-일반적으로, `유동비율` `당좌비율` `부채비율` `자기자본비율`을 안정성 지표, `매출액증가율` `영업이익증가율` `EBITDA증가율`을 성장성 지표, `ROA` `ROE`를 수익성 지표로 구분한다.
+일반적으로, `유동비율` `당좌비율` `부채비율` `자기자본비율`을 **안정성 지표**, `매출액증가율` `영업이익증가율` `EBITDA증가율`을 **성장성 지표**, `ROA` `ROE`를 **수익성 지표**로 구분한다.<BR/><BR/><BR/><BR/>
+
+## 적용 과정
+
+**데이터 불러오기 및 전처리**
+
+먼저, 크롤링하여 주요 재무비율 데이터를 불러오기 위해 함수를 만들었다. 코드에 대한 자세한 내용은 [이전 포스트][1]&[1]: https://yut-a.github.io/2020/09/30/crawling-BeautifulSoup/를 참고하기 바란다.
+
+{% highlight ruby %}
+!pip install html_table_parser
+
+pip install --upgrade html5lib
+
+pip install --upgrade beautifulsoup4
+{% endhighlight %}
+
+{% highlight ruby %}
+# 재무 비율 데이터 추출 함수
+def stock_info(stock_code = ""):
+    
+    from urllib.request import urlopen
+    from html_table_parser import parser_functions as parser
+    import pandas as pd
+    import bs4
+    import numpy as np
+    
+    # url 소스코드 긁어와 table 태그 데이터를 list 형식으로 변환
+    url =  "http://comp.fnguide.com/SVO2/ASP/SVD_FinanceRatio.asp?pGB=1&gicode=" + stock_code + "&cID=&MenuYn=Y&ReportGB=&NewMenuID=104&stkGb=701"
+    source = urlopen(url).read()
+    source = bs4.BeautifulSoup(source, "lxml")
+    table = source.find("table")
+    p = parser.make2d(table)
+    
+    # DataFrame 변환 / 필요없는 행 제거
+    df = pd.DataFrame(p, columns = p[0])
+    num = df.index[df.iloc[:,0].isin(["안정성비율", "성장성비율", "수익성비율", "활동성비율"])]
+    df = df.drop(num, axis = 0)
+    df = df.drop(0, axis = 0)
+    df = df.reset_index(drop = True)
+    
+    # 재무 비율 데이터만 추출
+    data = df.iloc[0:1]
+    
+    for i in range(2, (len(df) + 1)):
+        a = (3 * i) - 3
+        b = a + 1
+        data = pd.concat([data, df.iloc[a:b]])
+        
+    data = data.reset_index(drop = True)
+    
+    # index name 정리 및 적용
+    list_a = []
+    
+    for j in range(0, len(data)):
+        spl = data.iloc[:,0][j].split("(")
+        list_a.append(spl[0])
+        
+    if data.columns[0] == "IFRS(연결)":
+      data = data.drop(["IFRS(연결)"], axis = 1)
+      data.insert(0, "IFRS(연결)", list_a)
+
+    else:
+      data = data.drop(["IFRS(별도)"], axis = 1)
+      data.insert(0, "IFRS(별도)", list_a)
+    
+    return data
+{% endhighlight %}
+
+
+
+
+
+
 
 
 
