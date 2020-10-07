@@ -316,6 +316,124 @@ today_list.head()
 {% endhighlight %}
 <img width="242" alt="스크린샷 2020-10-08 오전 12 38 31" src="https://user-images.githubusercontent.com/70478154/95353787-a2254900-08fe-11eb-8cc5-e15ffb3315d5.png">
 
+**분석 적용**
+
+필요한 데이터들을 불러와 전처리를 완료했다. 78개 종목 별 `주요 재무비율` `2020-02-03 ~ 2020-04-17 종가` `2020-10-06 종가` 데이터로 정리했다.
+
+먼저, 주요 재무비율의 feature가 많기 때문에 PCA를 실시하여, 저차원으로 데이터를 활용하고자 한다.
+
+{% highlight ruby %}
+# PCA를 위한 label(종목명) 제거
+finance_df = finance.drop(["종목명"], axis = 1)
+
+# 숫자형 변환
+for i in range(0, len(finance_df.columns)):
+  finance_df.iloc[:,i] = finance_df.iloc[:,i].str.replace(",", "")
+
+finance_df = finance_df.astype(np.float)
+finance_df.dtypes
+{% endhighlight %}
+<img width="210" alt="스크린샷 2020-10-08 오전 12 52 31" src="https://user-images.githubusercontent.com/70478154/95355510-98044a00-0900-11eb-9ea8-91ede6ba5e68.png">
+
+주요 재무비율 데이터에 대한 PCA를 진행했고, 전체 데이터에 대한 누적 기여율을 파악하기 위해 PCA Scree plot을 통해 시각화했다.
+
+{% highlight ruby %}
+# PCA(전체)
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+scaler = StandardScaler()                       # Standardized
+standard = scaler.fit_transform(finance_df)
+
+pca_samp = PCA()
+pca_samp.fit(standard)
+
+vals_samp = pca_samp.explained_variance_ratio_            # 분산 비율
+eigenval_samp = pca_samp.explained_variance_              # Eigenvalues
+cumvals_samp = np.cumsum(vals_samp)                       # 누적 분산 비율(누적 기여율)
+
+print(cumvals_samp)
+print(eigenval_samp)
+{% endhighlight %}
+<img width="567" alt="스크린샷 2020-10-08 오전 1 09 47" src="https://user-images.githubusercontent.com/70478154/95357589-00542b00-0903-11eb-96ea-6e578f19bbbb.png">
+
+{% highlight ruby %}
+# Scree plot을 통한 시각화 - 6개의 PC만
+import matplotlib.pyplot as plt
+
+num = 6
+count = np.arange(num) + 1
+
+# 분산 비율, 누적 분산 비율 그리기 
+plt.figure(figsize = (6, 6))
+ax = plt.subplot()
+plt.bar(count, vals_samp[:6], color = "#a29bfe")
+plt.plot(count, cumvals_samp[:6], color = "#fdcb6e", marker = "*")
+
+# 분산 비율 그래프에 삽입
+for i in range(num):
+  ax.annotate(str(np.round(vals_samp[i] * 100, 2)) + "%",
+              (count[i], vals_samp[i]),
+              va = "bottom",
+              ha = "center",
+              fontsize = 10)
+
+# 누적 분산 비율 그래프에 삽입
+for i in range(1, 6):
+  ax.annotate(str(np.round(cumvals_samp[i] * 100, 2)) + "%",
+              (count[i], cumvals_samp[i]),
+              va = "bottom",
+              ha = "center",
+              fontsize = "9",
+              color = "gray")
+
+ax.set_xlabel("PCs")
+ax.set_ylabel("Variance rate");
+{% endhighlight %}
+<img width="387" alt="스크린샷 2020-10-08 오전 1 10 42" src="https://user-images.githubusercontent.com/70478154/95357709-2f6a9c80-0903-11eb-93d2-83d0375c31a9.png">
+
+일반적으로, Eigenvalues > 1인 PC까지 선택하여 PCA를 진행한다. 위의 결과에 따르면, PC3까지 1보다 크다는 것을 알 수 있고, 3차원으로 차원 축소하는 경우 전체 데이터의 약 81%를 설명할 수 있음을 알 수 있다. 이에 따라, 3차원으로 PCA를 다시 진행했다.
+
+{% highlight ruby %}
+# PCA(n = 3)
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+scaler = StandardScaler()                       # Standardized
+standard = scaler.fit_transform(finance_df)
+
+pca = PCA(3)
+pca.fit(standard)
+
+vals = pca.explained_variance_ratio_            # 분산 비율
+eigenval = pca.explained_variance_              # Eigenvalues
+cumvals = np.cumsum(vals)                       # 누적 분산 비율(누적 기여율)
+
+print(cumvals)
+print(eigenval)
+{% endhighlight %}
+<img width="293" alt="스크린샷 2020-10-08 오전 1 16 39" src="https://user-images.githubusercontent.com/70478154/95358401-faab1500-0903-11eb-813a-d7bc499c0d9e.png">
+
+PCA 결과를 바탕으로, Eigenvectors를 산출했다. 이는 각 PC에 대해 feature들이 얼마나 영향을 줄 수 있는지를 수치로 표현한 것이다. 이 데이터를 바탕으로 각 PC들의 특성을 확인해보고자 한다.
+
+{% highlight ruby %}
+# PC 특성 파악
+eigen_vec = pca.components_       # Eigenvectors
+eigen_vec = pd.DataFrame(eigen_vec, columns = finance_df.columns)
+eigen_vec = eigen_vec.T
+eigen_vec.columns = ["PC1", "PC2", "PC3"]
+eigen_vec
+{% endhighlight %}
+<img width="347" alt="스크린샷 2020-10-08 오전 1 20 56" src="https://user-images.githubusercontent.com/70478154/95359232-e287c580-0904-11eb-9eaf-06088b4911c8.png">
+
+위의 결과에 따르면,
+
+
+
+
+
+
+
 
 
 
@@ -378,9 +496,6 @@ max_min = pd.DataFrame({"종목명" : kospi100_max.columns,
 max_min
 {% endhighlight %}
 <img width="311" alt="스크린샷 2020-10-08 오전 12 24 01" src="https://user-images.githubusercontent.com/70478154/95351933-abadb180-08fc-11eb-8d46-fa0a858ba4be.png">
-
-**분석**
-
 
 
 
