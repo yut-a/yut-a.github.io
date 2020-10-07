@@ -77,12 +77,13 @@ df
 {% endhighlight %}
 <img width="778" alt="스크린샷 2020-10-01 오후 1 08 46" src="https://user-images.githubusercontent.com/70478154/94767445-50a12980-03e7-11eb-9e47-898a379f7499.png">
 
-데이터들을 데이터프레임 형식으로 잘 불러왔다. 이제 index를 정리하고 필요한 데이터들만 따로 추출하고자 한다.
+데이터들을 데이터프레임 형식으로 잘 불러왔다. 이제 index를 정리하고 필요한 데이터들만 따로 추출하고자 한다. 삼성전자가 아닌 다른 종목을 검색해보면, IFRS(연결) 혹은 IFRS(별도), 이렇게 두 종류의 데이터프레임이 존재하기 때문에 불러온 데이터프레임의 첫 행은 `isin`을 사용하지 않고, 따로 제거한다.
 
 {% highlight ruby %}
 # 필요없는 행 제거
-num = df.index[df["IFRS(연결)"].isin(["IFRS(연결)", "안정성비율", "성장성비율", "수익성비율", "활동성비율"])]
+num = df.index[df.iloc[:,0].isin(["안정성비율", "성장성비율", "수익성비율", "활동성비율"])]
 df = df.drop(num, axis = 0)
+df = df.drop(0, axis = 0)
 df = df.reset_index(drop = True)
 df
 {% endhighlight %}
@@ -110,13 +111,19 @@ data.head()
 # index name 정리
 list_a = []
 
-for i in range(0, len(data)):
-    spl = data["IFRS(연결)"][i].split("(")
+for j in range(0, len(data)):
+    spl = data.iloc[:,0][j].split("(")
     list_a.append(spl[0])
     
 # 정리한 index name 적용
-data = data.drop(["IFRS(연결)"], axis = 1)
-data.insert(0, "IFRS(연결)", list_a)
+if data.columns[0] == "IFRS(연결)":
+  data = data.drop(["IFRS(연결)"], axis = 1)
+  data.insert(0, "IFRS(연결)", list_a)
+
+else:
+  data = data.drop(["IFRS(별도)"], axis = 1)
+  data.insert(0, "IFRS(별도)", list_a)
+  
 data.head()
 {% endhighlight %}
 <img width="391" alt="스크린샷 2020-10-01 오후 1 25 45" src="https://user-images.githubusercontent.com/70478154/94768194-aecf0c00-03e9-11eb-8e53-6b2baaf9876e.png">
@@ -142,8 +149,9 @@ def stock_info(stock_code = ""):
     
     # DataFrame 변환 / 필요없는 행 제거
     df = pd.DataFrame(p, columns = p[0])
-    num = df.index[df["IFRS(연결)"].isin(["IFRS(연결)", "안정성비율", "성장성비율", "수익성비율", "활동성비율"])]
+    num = df.index[df.iloc[:,0].isin(["안정성비율", "성장성비율", "수익성비율", "활동성비율"])]
     df = df.drop(num, axis = 0)
+    df = df.drop(0, axis = 0)
     df = df.reset_index(drop = True)
     
     # 재무 비율 데이터만 추출
@@ -160,11 +168,16 @@ def stock_info(stock_code = ""):
     list_a = []
     
     for j in range(0, len(data)):
-        spl = data["IFRS(연결)"][j].split("(")
+        spl = data.iloc[:,0][j].split("(")
         list_a.append(spl[0])
         
-    data = data.drop(["IFRS(연결)"], axis = 1)
-    data.insert(0, "IFRS(연결)", list_a)
+    if data.columns[0] == "IFRS(연결)":
+      data = data.drop(["IFRS(연결)"], axis = 1)
+      data.insert(0, "IFRS(연결)", list_a)
+
+    else:
+      data = data.drop(["IFRS(별도)"], axis = 1)
+      data.insert(0, "IFRS(별도)", list_a)
     
     return data
 {% endhighlight %}
