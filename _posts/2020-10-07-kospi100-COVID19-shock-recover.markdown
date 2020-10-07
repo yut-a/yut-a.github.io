@@ -227,8 +227,159 @@ finance
 
 **종가 데이터 전처리**
 
+78개 종목의 `2020-02-03 ~ 2020-04-17 종가` 데이터를 불러와 정리했다.
+
+{% highlight ruby %}
+uploaded = files.upload()
+
+# 78개 종목 2020-02-03 ~ 2020-04-17 종가 데이터 불러오기
+import pandas as pd
+
+data_1 = pd.read_csv("kospi100_1.csv", skiprows = 3, engine = "python")
+data_2 = pd.read_csv("kospi100_2.csv", skiprows = 3, engine = "python")
+data_3 = pd.read_csv("kospi100_3.csv", skiprows = 3, engine = "python")
+data_4 = pd.read_csv("kospi100_4.csv", skiprows = 3, engine = "python")
+data_5 = pd.read_csv("kospi100_5.csv", skiprows = 3, engine = "python")
+data_6 = pd.read_csv("kospi100_6.csv", skiprows = 3, engine = "python")
+
+# 필요없는 칼럼 삭제
+col_1 = data_1.columns[16:]
+col_2 = data_2.columns[16:]
+col_3 = data_3.columns[16:]
+col_4 = data_4.columns[16:]
+col_5 = data_5.columns[16:]
+col_6 = data_6.columns[4:]
+
+data_1 = data_1.drop(col_1, axis = 1)
+data_2 = data_2.drop(col_2, axis = 1)
+data_3 = data_3.drop(col_3, axis = 1)
+data_4 = data_4.drop(col_4, axis = 1)
+data_5 = data_5.drop(col_5, axis = 1)
+data_6 = data_6.drop(col_6, axis = 1)
+
+# 첫 번째 칼럼 명 재설정 및 데이터 병합
+data_1.rename(columns = {"Unnamed: 0" : "date"}, inplace = True)
+data_2.rename(columns = {"Unnamed: 0" : "date"}, inplace = True)
+data_3.rename(columns = {"Unnamed: 0" : "date"}, inplace = True)
+data_4.rename(columns = {"Unnamed: 0" : "date"}, inplace = True)
+data_5.rename(columns = {"Unnamed: 0" : "date"}, inplace = True)
+data_6.rename(columns = {"Unnamed: 0" : "date"}, inplace = True)
+
+kospi100 = pd.merge(data_1, data_2, on = "date", how = "inner")
+kospi100 = pd.merge(kospi100, data_3, on = "date", how = "inner")
+kospi100 = pd.merge(kospi100, data_4, on = "date", how = "inner")
+kospi100 = pd.merge(kospi100, data_5, on = "date", how = "inner")
+kospi100 = pd.merge(kospi100, data_6, on = "date", how = "inner")
+
+kospi100.head()
+{% endhighlight %}
+<img width="1124" alt="스크린샷 2020-10-07 오후 11 53 08" src="https://user-images.githubusercontent.com/70478154/95348096-a3ec0e00-08f8-11eb-9393-fd155348c1ca.png">
+
+다음은, Kospi에 상장되어 있는 종목들의 `2020-10-06 종가` 데이터를 불러와 정리했다.
+
+{% highlight ruby %}
+uploaded = files.upload()
+
+# 2020-10-06 종가 데이터 불러오기
+today = pd.read_csv("today_price.csv", skiprows = 2, engine = "python")
+today = today[["종목코드", "종목명", "종가(원)"]]
+
+# 종목코드를 A000000 형식으로 변환
+today_code = today["종목코드"].tolist()
+today_change = []
+
+for i in range(0, len(today_code)):
+  if len(today_code[i]) == 6:
+    today_data = "A" + today_code[i]
+  
+  today_change.append(today_data)
+
+today = today.drop(["종목코드"], axis = 1)
+today.insert(0, "종목코드", today_change)
+today.head()
+{% endhighlight %}
+<img width="248" alt="스크린샷 2020-10-08 오전 12 34 37" src="https://user-images.githubusercontent.com/70478154/95353316-18757b80-08fe-11eb-9826-ce175318bd2b.png">
+
+이 중에서 필요한 종목인 78개의 종목 데이터들만 선별했다.
+
+{% highlight ruby %}
+# 사용할 종목코드의 종가만 선별
+extract_list = finance["종목명"].tolist()
+today_list = today[today["종목명"].isin(extract_list)]
+today_list = today_list.reset_index(drop = True)
+today_list.head()
+
+# 종가 숫자형 변환
+today_list["종가(원)"] = today_list["종가(원)"].str.replace(",", "")
+today_list["종가(원)"] = today_list["종가(원)"].astype(np.int)
+today_list.head()
+{% endhighlight %}
+<img width="242" alt="스크린샷 2020-10-08 오전 12 38 31" src="https://user-images.githubusercontent.com/70478154/95353787-a2254900-08fe-11eb-8cc5-e15ffb3315d5.png">
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+**여기부터는 뒤에 다시**
+데이터 전처리 이후 분석에서는, 코로나 19로 인한 타격 이전에 비해 타격 후 주가 급락이 몇 퍼센트로 나타나는지 확인하고자 한다. 코로나 19가 시작된 것은 2월보다 이전이지만, 본격적으로 경제에 충격을 주기 시작한 것은 3월부터이다. 따라서, 코로나 19로 인한 경제 타격 직전인 `2020-02-03  ~ 2020-02-28 종가`와 타격 이후 급락하는 시점인 `2020-03-02 ~ 2020-04-17 종가`로 나눴다. 또, 코로나로 인한 타격의 하락률을 계산하기 위해 종목 별 `2020-02-03  ~ 2020-02-28 종가`의 max 가격과 `2020-03-02 ~ 2020-04-17 종가`의 min 가격을 구하고 새로운 데이터프레임으로 정리했다.
+
+{% highlight ruby %}
+# 2020-02-03 ~ 2020-02-28 종가와 2020-03-02 ~ 2020-04-17 종가로 분할
+
+import numpy as np
+
+# 2020-02-03 ~ 2020-02-28 종가 / 숫자형으로 변형
+kospi100_max = kospi100[0:20]
+kospi100_max = kospi100_max.reset_index(drop = True)
+
+for i in range(0, len(kospi100_max.columns)):
+  kospi100_max.iloc[:,i] = kospi100_max.iloc[:,i].str.replace(",", "")
+
+kospi100_max = kospi100_max.iloc[:,1:].astype(np.int)
+
+# 2020-03-02 ~ 2020-04-17 종가 / 숫자형으로 변형
+kospi100_min = kospi100[20:54]
+kospi100_min = kospi100_min.reset_index(drop = True)
+
+for i in range(0, len(kospi100_min.columns)):
+  kospi100_min.iloc[:,i] = kospi100_min.iloc[:,i].str.replace(",", "")
+
+kospi100_min = kospi100_min.iloc[:,1:].astype(np.int)
+{% endhighlight %}
+
+{% highlight ruby %}
+# 종목 별 max price
+max_data = []
+
+for i in range(0, len(kospi100_max.columns)):
+  max_value = max(kospi100_max.iloc[:,i])
+  max_data.append(max_value)
+
+# 종목 별 min price
+min_data = []
+
+for i in range(0, len(kospi100_min.columns)):
+  min_value = min(kospi100_min.iloc[:,i])
+  min_data.append(min_value)
+
+# 종목 별 max / min data 병합
+max_min = pd.DataFrame({"종목명" : kospi100_max.columns,
+                        "max_price" : max_data,
+                        "min_price" : min_data})
+max_min
+{% endhighlight %}
+<img width="311" alt="스크린샷 2020-10-08 오전 12 24 01" src="https://user-images.githubusercontent.com/70478154/95351933-abadb180-08fc-11eb-8d46-fa0a858ba4be.png">
+
+**분석**
 
 
 
