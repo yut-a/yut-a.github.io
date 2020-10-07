@@ -510,29 +510,7 @@ sns.scatterplot(x = "PC3", y = "PC2", hue = "clusters", data = projec_data_clust
 
 **분석 적용**
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-**여기부터는 뒤에 다시**
-데이터 전처리 이후 분석에서는, 코로나 19로 인한 타격 이전에 비해 타격 후 주가 급락이 몇 퍼센트로 나타나는지 확인하고자 한다. 코로나 19가 시작된 것은 2월보다 이전이지만, 본격적으로 경제에 충격을 주기 시작한 것은 3월부터이다. 따라서, 코로나 19로 인한 경제 타격 직전인 `2020-02-03  ~ 2020-02-28 종가`와 타격 이후 급락하는 시점인 `2020-03-02 ~ 2020-04-17 종가`로 나눴다. 또, 코로나로 인한 타격의 하락률을 계산하기 위해 종목 별 `2020-02-03  ~ 2020-02-28 종가`의 max 가격과 `2020-03-02 ~ 2020-04-17 종가`의 min 가격을 구하고 새로운 데이터프레임으로 정리했다.
+이제 코로나 19로 인한 타격 이전에 비해 타격 후 주가 급락이 몇 퍼센트로 나타나는지 확인하고자 한다. 코로나 19가 시작된 것은 2월보다 이전이지만, 본격적으로 경제에 충격을 주기 시작한 것은 3월부터이다. 따라서, 코로나 19로 인한 경제 타격 직전인 `2020-02-03  ~ 2020-02-28 종가`와 타격 이후 급락하는 시점인 `2020-03-02 ~ 2020-04-17 종가`로 나눴다. 또, 코로나로 인한 타격의 하락률을 계산하기 위해 종목 별 `2020-02-03  ~ 2020-02-28 종가`의 max 가격과 `2020-03-02 ~ 2020-04-17 종가`의 min 가격을 구하고 새로운 데이터프레임으로 정리했다.
 
 {% highlight ruby %}
 # 2020-02-03 ~ 2020-02-28 종가와 2020-03-02 ~ 2020-04-17 종가로 분할
@@ -581,6 +559,33 @@ max_min
 {% endhighlight %}
 <img width="311" alt="스크린샷 2020-10-08 오전 12 24 01" src="https://user-images.githubusercontent.com/70478154/95351933-abadb180-08fc-11eb-8d46-fa0a858ba4be.png">
 
+max 가격과 min 가격을 바탕으로, 다음과 같이 하락률 산출하고 categorical data로 등급화했다.
+
+{% highlight ruby %}
+# 하락률 산출
+down = []
+
+for i in range(0, 78):
+  down_value = (max_min["min_price"][i] - max_min["max_price"][i]) / max_min["max_price"][i]
+  down_value = abs(round(down_value * 100, 2))
+  down.append(down_value)
+
+max_min["down(-%)"] = down
+
+# 하락률 categorical data로 등급화
+max_min["down(-%)_grade"] = pd.qcut(max_min["down(-%)"], 3, labels = ["low", "middle", "high"])
+max_min
+{% endhighlight %}
+<img width="529" alt="스크린샷 2020-10-08 오전 2 34 03" src="https://user-images.githubusercontent.com/70478154/95366731-ca1ca880-090e-11eb-8c6a-0c992136bcce.png">
+
+재무 비율의 특성에 따라 하락률 등급이 어떤 분포를 가지는지 파악하기 위해 crosstab을 통해 확인해 보았다. 그 결과, `안정성과 성장성 모두 나쁜 지표`를 가지는 종목일수록 하락률 등급이 high, middle, low 순으로 높았고, high 등급이 약 50%를 차지했다. 즉, **모두 나쁜 지표를 가지는 경우일수록 높은 하락률을 보일 가능성이 큼**을 알 수 있다. 또, `안정성이 높은 지표`를 가지는 종목일수록 하락률 등급이 low, middle, high 순으로 높았고, low 등급이 약 55%를 차지했다. 즉, **안정성이 높은 지표를 가지는 경우일수록 낮은 하락률을 보일 가능성이 큼**을 알 수 있다. 반면, `성장성이 높은 지표`의 경우 모든 하락률 등급에 고르게 분포되어 있어 특별한 관계를 파악할 수 없다.
+
+{% highlight ruby %}
+# crosstab_down(-%) => 0 - 둘 다 나쁨, 1 - 안정성, 2 - 성장성
+crosstab = pd.crosstab(max_min["down(-%)_grade"], projec_data_cluster["clusters"])
+crosstab
+{% endhighlight %}
+<img width="208" alt="스크린샷 2020-10-08 오전 2 50 34" src="https://user-images.githubusercontent.com/70478154/95368422-136df780-0911-11eb-8c36-700de7034323.png">
 
 
 
