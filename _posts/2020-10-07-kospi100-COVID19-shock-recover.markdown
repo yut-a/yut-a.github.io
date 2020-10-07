@@ -36,7 +36,7 @@ tags:   Data Finance
 
 ## 적용 과정
 
-**데이터 불러오기 및 전처리**
+**주요 재무비율과 종목명, 종목코드 데이터 전처리**
 
 먼저, 크롤링하여 주요 재무비율 데이터를 불러오기 위해 함수를 만들었다. 코드에 대한 자세한 내용은 [이전 포스트](https://yut-a.github.io/2020/09/30/crawling-BeautifulSoup/)를 참고하기 바란다.
 
@@ -100,6 +100,132 @@ def stock_info(stock_code = ""):
     return data
 {% endhighlight %}
 
+Kospi100 구성 종목명과 종목코드가 무엇인지 알아보기 위해 KRX에서 Kospi100 구성 종목에 대한 데이터를 받아서 불러왔다.
+
+{% highlight ruby %}
+from google.colab import files
+uploaded = files.upload()
+
+# Kospi 구성종목 데이터셋 불러오기
+import pandas as pd
+name = pd.read_csv("kospi100_name.csv")
+name.head()
+{% endhighlight %}
+<img width="592" alt="스크린샷 2020-10-07 오후 11 06 01" src="https://user-images.githubusercontent.com/70478154/95341860-b6af1480-08f1-11eb-890c-2f99522130a7.png">
+
+종목코드를 처리하기 편하도록 `A000000` 형식으로 바꿔주었다.
+
+{% highlight ruby %}
+# 종목코드를 A000000 형식으로 변환
+name = name.astype({"종목코드" : str})
+code = name["종목코드"].tolist()
+code_change = []
+
+for i in range(0, len(code)):
+  if len(code[i]) == 6:
+    data = "A" + code[i]
+
+  elif len(code[i]) == 5:
+    data = "A0" + code[i]
+
+  elif len(code[i]) == 4:
+    data = "A00" + code[i]
+
+  elif len(code[i]) == 3:
+    data = "A000" + code[i]
+
+  code_change.append(data)
+
+name = name.drop(["종목코드"], axis = 1)
+name.insert(0, "종목코드", code_change)
+name.head()
+{% endhighlight %}
+<img width="592" alt="스크린샷 2020-10-07 오후 11 09 21" src="https://user-images.githubusercontent.com/70478154/95342260-35a44d00-08f2-11eb-8009-e0eb25665b47.png">
+
+필요없는 열을 모두 제거했다. 또, `SK바이오팜`을 SK바이오팜 이전에 Kospi100 구성 종목이었던 `KCC`로 대체했다. 그 이유는, SK바이오팜이 2020년 7월 2일에 상장되어 데이터가 많지 않기 때문이다.
+
+{% highlight ruby %}
+# 종목코드, 종목명 열을 제외한 모든 열 제거
+name = name.drop(["현재가", "대비", "등락률", "거래대금(원)", "상장시가총액(원)"], axis = 1)
+
+# SK바이오팜을 KCC로 대체
+name[name["종목명"] == "SK바이오팜"]    # 46행
+name = name.drop([46], axis = 0)
+name.loc[200] = ["A002380", "KCC"]
+name = name.reset_index(drop = True)
+name
+{% endhighlight %}
+<img width="200" alt="스크린샷 2020-10-07 오후 11 15 50" src="https://user-images.githubusercontent.com/70478154/95343093-178b1c80-08f3-11eb-82f3-70d7e8b88c6a.png">
+
+데이터 소개에서 언급했던 것처럼, 금융 관련 종목들을 제외했다. 재무 비율 추출 함수를 통해 불러온 데이터프레임의 행 개수는 23개이지만, 금융 관련 종목들은 23개보다 적다. 따라서, 이를 이용해 제외할 리스트를 선별했다. 제외한 종목은 16개이다.
+
+{% highlight ruby %}
+# 은행, 증권, 보험, 카드 종목 제외 리스트
+list_for_drop = name["종목코드"].tolist()
+drop_list = []
+
+for i in list_for_drop:
+  stock = stock_info(i)
+  if len(stock) != 23:
+    datas = i
+    drop_list.append(datas)
+
+# 은행, 증권, 보험, 카드 종목 제외
+number = name.index[name["종목코드"].isin(drop_list)]
+name = name.drop(number, axis = 0)
+name = name.reset_index(drop = True)
+name
+{% endhighlight %}
+<img width="204" alt="스크린샷 2020-10-07 오후 11 26 53" src="https://user-images.githubusercontent.com/70478154/95344466-a5b3d280-08f4-11eb-8360-a2b24fa1c331.png">
+
+다음은, 위의 종목코드 순서대로 재무 비율 추출 함수를 통해 필요한 재무 비율들을 종목 별로 불러와 데이터프레임으로 정리했다.
+
+{% highlight ruby %}
+# 종목 별 재무비율 데이터 통합
+codes = name["종목코드"].tolist()
+num = [0, 1, 2, 6, 7, 9, 10, 16, 17]      # 재무비율 데이터프레임에서 필요한 재무비율 위치
+finance = pd.DataFrame(columns = ["유동비율", "당좌비율", "부채비율", "자기자본비율", "매출액증가율", "영업이익증가율", "EBITDA증가율", "ROA", "ROE"])
+list_2019 = []
+count = 0
+
+for i in codes:
+  stock = stock_info(i)
+  for j in num:
+    num_data = stock["2019/12"][j]
+    list_2019.append(num_data)
+
+  finance.loc[count] = list_2019
+  list_2019 = []
+  count = count + 1
+
+finance.head()
+{% endhighlight %}
+<img width="673" alt="스크린샷 2020-10-07 오후 11 33 38" src="https://user-images.githubusercontent.com/70478154/95345424-aac55180-08f5-11eb-9427-6763a05364f4.png">
+
+종목 별 재무비율 데이터에 종목 명 칼럼을 추가하고 결측치를 제거했다. 결측치가 존재하는 6개의 종목들을 제거했다.
+
+{% highlight ruby %}
+# 종목명 칼럼 추가
+names = name["종목명"].tolist()
+finance.insert(0, "종목명", names)
+
+# 결측치 제거
+import numpy as np
+finance = finance.replace("N/A", np.nan)
+finance = finance.replace("적전", np.nan)
+finance = finance.replace("적지", np.nan)
+finance = finance.replace("흑전", np.nan)
+finance = finance.replace("흑지", np.nan)
+finance = finance.replace("완전잠식", np.nan)
+finance.isnull().sum()
+
+finance = finance.dropna(axis = 0)
+finance = finance.reset_index(drop = True)
+finance
+{% endhighlight %}
+<img width="782" alt="스크린샷 2020-10-07 오후 11 39 09" src="https://user-images.githubusercontent.com/70478154/95346032-58d0fb80-08f6-11eb-9b27-2d6f0f56ac1f.png">
+
+**종가 데이터 전처리**
 
 
 
