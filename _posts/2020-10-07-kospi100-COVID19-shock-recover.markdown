@@ -38,7 +38,7 @@ tags:   Data Finance
 
 **데이터 불러오기 및 전처리**
 
-먼저, 크롤링하여 주요 재무비율 데이터를 불러오기 위해 함수를 만들었다. 코드에 대한 자세한 내용은 [이전 포스트][1]&[1]: https://yut-a.github.io/2020/09/30/crawling-BeautifulSoup/를 참고하기 바란다.
+먼저, 크롤링하여 주요 재무비율 데이터를 불러오기 위해 함수를 만들었다. 코드에 대한 자세한 내용은 [이전 포스트](https://yut-a.github.io/2020/09/30/crawling-BeautifulSoup/"yut-a")를 참고하기 바란다.
 
 {% highlight ruby %}
 !pip install html_table_parser
