@@ -601,10 +601,53 @@ chi2_contingency(crosstab, correction = False)
 {% endhighlight %}
 <img width="399" alt="스크린샷 2020-10-08 오전 2 57 23" src="https://user-images.githubusercontent.com/70478154/95369156-0a315a80-0912-11eb-9c13-cb69a51f8652.png">
 
+이번에는 코로나로 인한 급락 이후 현재 얼마나 회복했는지를 재무 비율 특성에 따라 구분해보고자 한다.
 
+먼저, `2020-10-06 종가` 데이터를 max_min 데이터프레임에 병합하고, 몇 퍼센트 회복했는지를 나타냈다. 또, 회복률을 categorical data로 등급화했다.
 
+{% highlight ruby %}
+# 2020-10-06 종가 데이터 병합
+max_min_today = pd.merge(max_min, today_list, on = "종목명", how = "inner")
+max_min_today = max_min_today.drop("종목코드", axis = 1)
 
+# 회복(%) 산출
+recover = []
 
+for i in range(0, 78):
+  recover_value = (max_min_today["종가(원)"][i] / max_min_today["max_price"][i]) * 100
+  recover_value = round(recover_value, 2)
+  recover.append(recover_value)
 
+max_min_today["recover(%)"] = recover
 
+# 회복률 categorical data로 등급화
+max_min_today["recover(%)_grade"] = pd.qcut(max_min_today["recover(%)"], 3, labels = ["low", "middle", "high"])
+max_min_today
+{% endhighlight %}
+<img width="849" alt="스크린샷 2020-10-08 오전 3 14 55" src="https://user-images.githubusercontent.com/70478154/95370939-7ad97680-0914-11eb-96a4-a38364e1d46e.png">
+
+재무 비율의 특성에 따라 회복률 등급이 어떤 분포를 가지는지 파악하기 위해 crosstab을 실시한 결과, 안정성과 성장성 모두 나쁜 지표를 가진 clusters=0의 경우 가장 많은 low 등급에 분포되어 있기는 하지만, 전체적으로 재무 비율 특성에 따른 큰 관계가 없음을 알 수 있다.
+
+{% highlight ruby %}
+# crosstab_recover(%) => 0 - 둘 다 나쁨, 1 - 안정성, 2 - 성장성
+crosstab_recover = pd.crosstab(max_min_today["recover(%)_grade"], projec_data_cluster["clusters"])
+crosstab_recover
+{% endhighlight %}
+<img width="235" alt="스크린샷 2020-10-08 오전 3 21 39" src="https://user-images.githubusercontent.com/70478154/95371623-6d70bc00-0915-11eb-83ca-27ccc13e709c.png">
+
+마찬가지로, 두 변수 간의 관계가 통계적으로 유의미한지 알아보고자 한다.
+
+귀무가설 : recover(%)\_grade와 clusters 변수는 서로 독립이다.<BR/>
+대립가설 : recover(%)\_grade와 clusters 변수는 서로 연관이 있다.
+
+`Chi-squared test` 결과, P-value는 약 0.58로, 0.05보다 매우 높다. 즉, 귀무가설을 기각할 수 없으며, **두 변수는 서로 독립**이라고 할 수 있다.
+
+{% highlight ruby %}
+# chi-squared test_recover
+from scipy.stats import chi2_contingency
+chi2_contingency(crosstab_recover, correction = False)
+{% endhighlight %}
+<img width="403" alt="스크린샷 2020-10-08 오전 3 24 38" src="https://user-images.githubusercontent.com/70478154/95371942-d8ba8e00-0915-11eb-987b-e27498229452.png"><BR/><BR/><BR/><BR/>
+
+## 
 
