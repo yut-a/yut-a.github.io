@@ -587,7 +587,9 @@ crosstab
 {% endhighlight %}
 <img width="208" alt="스크린샷 2020-10-08 오전 2 50 34" src="https://user-images.githubusercontent.com/70478154/95368422-136df780-0911-11eb-8c36-700de7034323.png">
 
-살펴본 두 변수 간의 관계가 
+살펴본 두 변수 간의 관계가 통계적으로 유의미한지 알아보고자 한다.
+귀무가설 : <pre/>down(-%)_grade<pre>와 clusters 변수는 서로 독립이다.
+대립가설 : 
 
 
 
