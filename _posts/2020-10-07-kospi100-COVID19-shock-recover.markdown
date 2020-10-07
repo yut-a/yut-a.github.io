@@ -588,10 +588,18 @@ crosstab
 <img width="208" alt="스크린샷 2020-10-08 오전 2 50 34" src="https://user-images.githubusercontent.com/70478154/95368422-136df780-0911-11eb-8c36-700de7034323.png">
 
 살펴본 두 변수 간의 관계가 통계적으로 유의미한지 알아보고자 한다.
-귀무가설 : <pre/>down(-%)_grade<pre>와 clusters 변수는 서로 독립이다.
-대립가설 : 
 
+귀무가설 : down(-%)\_grade와 clusters 변수는 서로 독립이다.<BR/>
+대립가설 : down(-%)\_grade와 clusters 변수는 서로 연관이 있다.
 
+`Chi-squared test` 결과, P-value는 약 0.0487로, 0.05보다 작다. 유의수준 5%에서 귀무가설을 기각한다. 즉, **두 변수는 서로 연관이 있음**을 알 수 있다.
+
+{% highlight ruby %}
+# chi-squared test_down(-%)
+from scipy.stats import chi2_contingency
+chi2_contingency(crosstab, correction = False)
+{% endhighlight %}
+<img width="399" alt="스크린샷 2020-10-08 오전 2 57 23" src="https://user-images.githubusercontent.com/70478154/95369156-0a315a80-0912-11eb-9c13-cb69a51f8652.png">
 
 
 
