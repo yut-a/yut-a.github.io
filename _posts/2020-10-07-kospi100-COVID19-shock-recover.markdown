@@ -447,7 +447,12 @@ projec
 PCA 결과를 바탕으로, 각 종목들을 안정성, 성장성, 수익성 등 특성에 따라 묶기 위해 K-Means clustering을 진행했다.
 
 {% highlight ruby %}
+# K-Means를 위한 label 제거
+projec_data = projec.drop(["종목명"], axis = 1)
+
 # parameter 선택
+from sklearn.cluster import KMeans
+
 sum_of_squared_distances = []
 K = range(1,15)
 for k in K:
@@ -466,9 +471,6 @@ plt.show()
 그래프에 따르면, k=3부터 하락폭이 완만하게 줄어들기 때문에 클러스터 수를 3으로 설정했다. 물론 보는 사람에 따라 다를 수 있기 때문에 스스로 알맞게 판단하는 것이 좋다. 
 
 {% highlight ruby %}
-# K-Means를 위한 label 제거
-projec_data = projec.drop(["종목명"], axis = 1)
-
 # K-Means
 from sklearn.cluster import KMeans
 kmeans_pca = KMeans(n_clusters = 3, random_state = 0)
