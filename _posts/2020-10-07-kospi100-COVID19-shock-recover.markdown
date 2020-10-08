@@ -392,7 +392,7 @@ ax.set_ylabel("Variance rate");
 {% endhighlight %}
 <img width="387" alt="스크린샷 2020-10-08 오전 1 10 42" src="https://user-images.githubusercontent.com/70478154/95357709-2f6a9c80-0903-11eb-93d2-83d0375c31a9.png">
 
-일반적으로, Eigenvalues > 1인 PC까지 선택하여 PCA를 진행한다. 위의 결과에 따르면, PC3까지 1보다 크다는 것을 알 수 있고, 3차원으로 차원 축소하는 경우 전체 데이터의 약 81%를 설명할 수 있음을 알 수 있다. 이에 따라, 3차원으로 PCA를 다시 진행했다.
+일반적으로, Eigenvalues > 1인 PC까지 선택하여 PCA를 진행한다. 위의 결과에 따르면, PC3까지 1보다 크다는 것을 알 수 있고, 3차원으로 차원 축소하는 경우 전체 데이터의 약 `81%`를 설명할 수 있음을 알 수 있다. 이에 따라, 3차원으로 PCA를 다시 진행했다.
 
 {% highlight ruby %}
 # PCA(n = 3)
@@ -594,7 +594,7 @@ crosstab
 귀무가설 : `down(-%)\_grade`와 `clusters` 변수는 서로 독립이다.<BR/>
 대립가설 : `down(-%)\_grade`와 `clusters` 변수는 서로 연관이 있다.
 
-`Chi-squared test` 결과, P-value는 약 0.0487로, 0.05보다 작다. 유의수준 5%에서 귀무가설을 기각한다. 즉, **두 변수는 서로 연관이 있음**을 알 수 있다.
+`Chi-squared test` 결과, **P-value는 약 0.0487**로, 0.05보다 작다. 유의수준 5%에서 귀무가설을 기각한다. 즉, **두 변수는 서로 연관이 있음**을 알 수 있다.
 
 {% highlight ruby %}
 # chi-squared test_down(-%)
@@ -628,7 +628,7 @@ max_min_today
 {% endhighlight %}
 <img width="849" alt="스크린샷 2020-10-08 오전 3 14 55" src="https://user-images.githubusercontent.com/70478154/95370939-7ad97680-0914-11eb-96a4-a38364e1d46e.png">
 
-재무 비율의 특성에 따라 회복률 등급이 어떤 분포를 가지는지 파악하기 위해 crosstab을 실시한 결과, 안정성과 성장성 모두 나쁜 지표를 가진 clusters=0의 경우 가장 많은 low 등급에 분포되어 있기는 하지만, 전체적으로 재무 비율 특성에 따른 큰 관계가 없음을 알 수 있다.
+재무 비율의 특성에 따라 회복률 등급이 어떤 분포를 가지는지 파악하기 위해 crosstab을 실시한 결과, 안정성과 성장성 모두 나쁜 지표를 가진 종목들의 경우 가장 많은 low 등급에 분포되어 있기는 하지만, 전체적으로 재무 비율 특성에 따른 큰 관계가 없음을 알 수 있다.
 
 {% highlight ruby %}
 # crosstab_recover(%) => 0 - 둘 다 나쁨, 1 - 안정성, 2 - 성장성
@@ -642,7 +642,7 @@ crosstab_recover
 귀무가설 : `recover(%)\_grade`와 `clusters` 변수는 서로 독립이다.<BR/>
 대립가설 : `recover(%)\_grade`와 `clusters` 변수는 서로 연관이 있다.
 
-`Chi-squared test` 결과, P-value는 약 0.58로, 0.05보다 매우 높다. 즉, 귀무가설을 기각할 수 없으며, **두 변수는 서로 연관이 없다**고 할 수 있다.
+`Chi-squared test` 결과, **P-value는 약 0.58**로, 0.05보다 매우 높다. 즉, 귀무가설을 기각할 수 없으며, **두 변수는 서로 연관이 없다**고 할 수 있다.
 
 {% highlight ruby %}
 # chi-squared test_recover
