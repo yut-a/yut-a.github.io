@@ -591,8 +591,8 @@ crosstab
 
 살펴본 두 변수 간의 관계가 통계적으로 유의미한지 알아보고자 한다.
 
-귀무가설 : down(-%)\_grade와 clusters 변수는 서로 독립이다.<BR/>
-대립가설 : down(-%)\_grade와 clusters 변수는 서로 연관이 있다.
+귀무가설 : `down(-%)\_grade`와 `clusters` 변수는 서로 독립이다.<BR/>
+대립가설 : `down(-%)\_grade`와 `clusters` 변수는 서로 연관이 있다.
 
 `Chi-squared test` 결과, P-value는 약 0.0487로, 0.05보다 작다. 유의수준 5%에서 귀무가설을 기각한다. 즉, **두 변수는 서로 연관이 있음**을 알 수 있다.
 
@@ -639,8 +639,8 @@ crosstab_recover
 
 마찬가지로, 두 변수 간의 관계가 통계적으로 유의미한지 알아보고자 한다.
 
-귀무가설 : recover(%)\_grade와 clusters 변수는 서로 독립이다.<BR/>
-대립가설 : recover(%)\_grade와 clusters 변수는 서로 연관이 있다.
+귀무가설 : `recover(%)\_grade`와 `clusters` 변수는 서로 독립이다.<BR/>
+대립가설 : `recover(%)\_grade`와 `clusters` 변수는 서로 연관이 있다.
 
 `Chi-squared test` 결과, P-value는 약 0.58로, 0.05보다 매우 높다. 즉, 귀무가설을 기각할 수 없으며, **두 변수는 서로 독립**이라고 할 수 있다.
 
@@ -651,5 +651,5 @@ chi2_contingency(crosstab_recover, correction = False)
 {% endhighlight %}
 <img width="403" alt="스크린샷 2020-10-08 오전 3 24 38" src="https://user-images.githubusercontent.com/70478154/95371942-d8ba8e00-0915-11eb-987b-e27498229452.png"><BR/><BR/><BR/><BR/>
 
-## 
+## 결론
 
