@@ -508,7 +508,7 @@ sns.scatterplot(x = "PC3", y = "PC2", hue = "clusters", data = projec_data_clust
 
 따라서, PC1과 PC2의 cluster를 중심으로 코로나 19에 따른 충격과 회복에 대한 분석을 실시하고자 한다.
 
-**분석 적용**
+**코로나 19로 인한 주가 급락과 회복 분석 및 Chi-squared test**
 
 이제 코로나로 인한 타격으로 주가 급락이 어떻게 나타나는지를 재무 비율 특성에 따라 구분해보고자 한다.
 
