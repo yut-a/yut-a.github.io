@@ -642,7 +642,7 @@ crosstab_recover
 귀무가설 : `recover(%)\_grade`와 `clusters` 변수는 서로 독립이다.<BR/>
 대립가설 : `recover(%)\_grade`와 `clusters` 변수는 서로 연관이 있다.
 
-`Chi-squared test` 결과, P-value는 약 0.58로, 0.05보다 매우 높다. 즉, 귀무가설을 기각할 수 없으며, **두 변수는 서로 독립**이라고 할 수 있다.
+`Chi-squared test` 결과, P-value는 약 0.58로, 0.05보다 매우 높다. 즉, 귀무가설을 기각할 수 없으며, **두 변수는 서로 연관이 없다**고 할 수 있다.
 
 {% highlight ruby %}
 # chi-squared test_recover
