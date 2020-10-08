@@ -591,6 +591,21 @@ crosstab
 {% endhighlight %}
 <img width="208" alt="스크린샷 2020-10-08 오전 2 50 34" src="https://user-images.githubusercontent.com/70478154/95368422-136df780-0911-11eb-8c36-700de7034323.png">
 
+crosstab 결과를 시각화하여 나타냈다.
+
+{% highlight ruby %}
+# crosstab_down(-%) 시각화
+pd.crosstab(projec_data_cluster["clusters"], max_min["down(-%)_grade"]).plot(kind = "bar",                        # 그래프 x축에 clusters를 놓기 위해 crosstab 순서 바꿈
+                                                                             color = ["navy", "gray", "black"],
+                                                                             grid = False,
+                                                                             alpha = 0.6)
+plt.ylabel("number")
+plt.xticks(np.arange(0, 3), labels = ["Bad", "Stability", "growth"], rotation = 0)
+plt.legend()
+plt.show()
+{% endhighlight %}
+<img width="382" alt="스크린샷 2020-10-08 오후 10 20 29" src="https://user-images.githubusercontent.com/70478154/95464186-9e53fe00-09b4-11eb-8ac2-16907fe35364.png">
+
 살펴본 두 변수 간의 관계가 통계적으로 유의미한지 알아보고자 한다.
 
 귀무가설 : `down(-%)\_grade`와 `clusters` 변수는 서로 독립이다.<BR/>
@@ -638,6 +653,21 @@ crosstab_recover = pd.crosstab(max_min_today["recover(%)_grade"], projec_data_cl
 crosstab_recover
 {% endhighlight %}
 <img width="235" alt="스크린샷 2020-10-08 오전 3 21 39" src="https://user-images.githubusercontent.com/70478154/95371623-6d70bc00-0915-11eb-83ca-27ccc13e709c.png">
+
+위의 crosstab 결과를 시각화하여 나타냈다.
+
+{% highlight ruby %}
+# crosstab_recover(%) 시각화
+pd.crosstab(projec_data_cluster["clusters"], max_min_today["recover(%)_grade"]).plot(kind = "bar",                        # 그래프 x축에 clusters를 놓기 위해 crosstab 순서 바꿈
+                                                                             color = ["navy", "gray", "black"],
+                                                                             grid = False,
+                                                                             alpha = 0.6)
+plt.ylabel("number")
+plt.xticks(np.arange(0, 3), labels = ["Bad", "Stability", "growth"], rotation = 0)
+plt.legend()
+plt.show()
+{% endhighlight %}
+<img width="382" alt="스크린샷 2020-10-08 오후 10 23 07" src="https://user-images.githubusercontent.com/70478154/95464431-e7a44d80-09b4-11eb-82b9-5d11b893538f.png">
 
 마찬가지로, 두 변수 간의 관계가 통계적으로 유의미한지 알아보고자 한다.
 
