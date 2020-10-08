@@ -225,7 +225,7 @@ finance
 {% endhighlight %}
 <img width="782" alt="스크린샷 2020-10-07 오후 11 39 09" src="https://user-images.githubusercontent.com/70478154/95346032-58d0fb80-08f6-11eb-9b27-2d6f0f56ac1f.png">
 
-**종가 데이터 전처리**
+#### _종가 데이터 전처리_
 
 78개 종목의 `2020-02-03 ~ 2020-04-17 종가` 데이터를 불러와 정리했다.
 
@@ -316,7 +316,7 @@ today_list.head()
 {% endhighlight %}
 <img width="242" alt="스크린샷 2020-10-08 오전 12 38 31" src="https://user-images.githubusercontent.com/70478154/95353787-a2254900-08fe-11eb-8cc5-e15ffb3315d5.png">
 
-**PCA와 K-Means**
+#### _PCA와 K-Means_
 
 필요한 데이터들을 불러와 전처리를 완료했다. 78개 종목 별 `주요 재무비율` `2020-02-03 ~ 2020-04-17 종가` `2020-10-06 종가` 데이터로 정리했다.
 
@@ -508,7 +508,7 @@ sns.scatterplot(x = "PC3", y = "PC2", hue = "clusters", data = projec_data_clust
 
 따라서, PC1과 PC2의 cluster를 중심으로 코로나 19에 따른 충격과 회복에 대한 분석을 실시하고자 한다.
 
-**코로나 19로 인한 주가 급락과 회복 분석 및 Chi-squared test**
+#### _코로나 19로 인한 주가 급락과 회복 분석 및 Chi-squared test_
 
 이제 코로나로 인한 타격으로 주가 급락이 어떻게 나타나는지를 재무 비율 특성에 따라 구분해보고자 한다.
 
