@@ -111,7 +111,7 @@ data.head()
 # index name 정리
 list_a = []
 
-for j in range(0, len(data)):
+for j in range(2, (int(len(df) / 3) + 1)):
     spl = data.iloc[:,0][j].split("(")
     list_a.append(spl[0])
     
@@ -157,7 +157,7 @@ def stock_info(stock_code = ""):
     # 재무 비율 데이터만 추출
     data = df.iloc[0:1]
     
-    for i in range(2, (len(df) + 1)):
+    for i in range(2, (int(len(df) / 3) + 1)):
         a = (3 * i) - 3
         b = a + 1
         data = pd.concat([data, df.iloc[a:b]])
