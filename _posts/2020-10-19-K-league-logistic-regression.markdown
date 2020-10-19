@@ -190,8 +190,28 @@ X_train.shape, X_test.shape
 {% endhighlight %}
 <img width="190" alt="스크린샷 2020-10-20 오전 8 24 44" src="https://user-images.githubusercontent.com/70478154/96522145-bf1e2c80-12ad-11eb-99cb-29d4af1a312d.png">
 
+train과 test set으로 잘 구분이 된 것을 확인할 수 있다. 이를 바탕으로 Logistic Regression을 학습하고 score를 확인해 보고자 한다.
+
+{% highlight ruby %}
+# Logistic Regression 학습
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.pipeline import make_pipeline
+
+pipe = make_pipeline(
+    StandardScaler(), 
+    LogisticRegressionCV(cv = 5, random_state = 0)
+)
+pipe.fit(X_train, y_train)
+
+# Logistic Regression score
+print("훈련 정확도: ", pipe.score(X_train, y_train))
+print("테스트 정확도: ", pipe.score(X_test, y_test))
+{% endhighlight %}
+<img width="270" alt="스크린샷 2020-10-20 오전 8 29 27" src="https://user-images.githubusercontent.com/70478154/96522484-6bf8a980-12ae-11eb-842c-2a4809f1f1b2.png">
 
 
 
+정확ㄷㄹ
 
 
