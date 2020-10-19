@@ -168,7 +168,17 @@ football_data_final.head()
 {% endhighlight %}
 <img width="616" alt="스크린샷 2020-10-20 오전 8 18 59" src="https://user-images.githubusercontent.com/70478154/96521775-f6400e00-12ac-11eb-9dea-8d931729e4a6.png">
 
-데이터 전처리를 완료한 후, 로지스틱 회귀 분석을 위해 train과 test set으로 나누고, feature와 target으로 데이터를 구분했다. validation set을 사용하지 않은 이유는 데이터의 양이 많지 않기 때문이며, 이를 위해 `LogisticRegressionCV`를 활용하고자 한다.
+이로써 데이터 전처리를 완료했다. 본격적인 분석 전, 기준 모델의 정확도를 파악하고자 한다.
+
+{% highlight ruby %}
+# baseline
+football_data_final["결과"].value_counts(normalize = True)
+{% endhighlight %}
+<img width="226" alt="스크린샷 2020-10-20 오전 8 35 30" src="https://user-images.githubusercontent.com/70478154/96522832-428c4d80-12af-11eb-907a-31c51fe54e12.png">
+
+결과에 따르면, 승, 패 모두 50%이기 때문에 기준모델의 정확도를 50%로 설정하고 분석을 진행했다.
+
+로지스틱 회귀 분석을 위해 train과 test set으로 나누고, feature와 target으로 데이터를 구분했다. validation set을 사용하지 않은 이유는 데이터의 양이 많지 않기 때문이며, 이를 위해 `LogisticRegressionCV`를 활용하고자 한다.
 
 {% highlight ruby %}
 # train, test set
@@ -190,7 +200,7 @@ X_train.shape, X_test.shape
 {% endhighlight %}
 <img width="190" alt="스크린샷 2020-10-20 오전 8 24 44" src="https://user-images.githubusercontent.com/70478154/96522145-bf1e2c80-12ad-11eb-99cb-29d4af1a312d.png">
 
-train과 test set으로 잘 구분이 된 것을 확인할 수 있다. 이를 바탕으로 Logistic Regression을 학습하고 score를 확인해 보고자 한다.
+train과 test set으로 잘 구분이 된 것을 확인할 수 있다. 이를 바탕으로 Logistic Regression을 학습하고 예측 score를 확인해 보고자 한다.
 
 {% highlight ruby %}
 # Logistic Regression 학습
@@ -210,8 +220,39 @@ print("테스트 정확도: ", pipe.score(X_test, y_test))
 {% endhighlight %}
 <img width="270" alt="스크린샷 2020-10-20 오전 8 29 27" src="https://user-images.githubusercontent.com/70478154/96522484-6bf8a980-12ae-11eb-842c-2a4809f1f1b2.png">
 
+정확도를 보면, 테스트 정확도는 **66.97%**로 많이 높은 수치는 아니지만, baseline 보다 높은 정확도를 만들어냈고, 과적합 없이 잘 학습되었음을 알 수 있다.
 
+위에서 만든 모델의 feature 간 다중공선성이 존재하는지 파악하고자 한다. 일반적으로 VIF > 10인 경우 다중공선성이 있다고 이야기하며, 다중공선성이 존재하면 모델의 성과에 악영향을 끼칠 수 있다.
 
-정확ㄷㄹ
+{% highlight ruby %}
+# 다중공선성
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 
+col = X_train.columns
+pipe_m = pipe.named_steps["standardscaler"]
+X_train_pipe = pipe_m.fit_transform(X_train)
+
+X = pd.DataFrame(X_train_pipe, columns = col)
+
+vif_data = pd.DataFrame() 
+vif_data["feature"] = X.columns
+vif_data["VIF"] = [variance_inflation_factor(X.values, i) for i in range(len(col))]
+
+vif_data
+{% endhighlight %}
+<img width="182" alt="스크린샷 2020-10-20 오전 8 48 01" src="https://user-images.githubusercontent.com/70478154/96523577-035efc00-12b1-11eb-9fae-79dad26fd647.png">
+
+결과에 따르면, 모든 feature의 VIF는 10보다 작으며, 모델에서 다중공선성 문제가 발생하지 않는다는 것을 알 수 있다. 마지막으로, 모델의 회귀계수를 통해 어떤 요인들이 결과에 얼마나 영향을 주는지 알아보고자 한다.
+
+{% highlight ruby %}
+# 회귀계수
+logit = LogisticRegressionCV(cv = 5, random_state = 0)
+logit.fit(X_train_pipe, y_train)
+
+coef_logit = pd.Series(logit.coef_[0], X_train.columns)
+coef_logit
+{% endhighlight %}
+<img width="174" alt="스크린샷 2020-10-20 오전 8 56 11" src="https://user-images.githubusercontent.com/70478154/96524044-28a03a00-12b2-11eb-8a32-e15035c0af27.png">
+
+회귀계수에 
 
