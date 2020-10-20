@@ -244,7 +244,7 @@ vif_data
 
 결과에 따르면, 모든 feature의 VIF는 10보다 작으며, 모델에서 다중공선성 문제가 발생하지 않는다는 것을 알 수 있다.
 
-마지막으로, 모델의 회귀계수를 통해 어떤 요인들이 결과에 얼마나 영향을 주는지 알아보고자 한다.
+마지막으로, 모델의 회귀계수를 통해 어떤 요인들이 결과에 얼마나 영향을 주는지 알아보고자 한다. 회귀계수 산출 결과와 시각화는 다음과 같다.
 
 {% highlight ruby %}
 # 회귀계수
@@ -255,6 +255,34 @@ coef_logit = pd.Series(logit.coef_[0], X_train.columns)
 coef_logit
 {% endhighlight %}
 <img width="174" alt="스크린샷 2020-10-20 오전 8 56 11" src="https://user-images.githubusercontent.com/70478154/96524044-28a03a00-12b2-11eb-8a32-e15035c0af27.png">
+
+{% highlight ruby %}
+# 한글 및 마이너스
+import matplotlib as mpl
+
+mpl.rc("font", family='AppleGothic')
+mpl.rc('axes', unicode_minus=False)
+
+# matplotlib 화질
+%config InlineBackend.figure_format='retina'
+
+# 회귀계수 시각화
+import matplotlib.pyplot as plt
+
+plt.figure(figsize = (10, 5))
+
+color = []
+for i in range(0, len(coef_logit.sort_values())):
+    if coef_logit.sort_values()[i] >= 0:
+        col = "salmon"
+        color.append(col)
+    else:
+        col = "skyblue"
+        color.append(col)
+
+coef_logit.sort_values().plot.barh(color = color);
+{% endhighlight %}
+<img width="623" alt="스크린샷 2020-10-20 오후 8 58 30" src="https://user-images.githubusercontent.com/70478154/96583040-199fa300-1317-11eb-8cea-6a78b52e4e5a.png">
 
 회귀계수에 따르면, `볼점유율` `코너킥` `퇴장` `공격수`가 증가하면 **승리에 부정적 영향**을 미치며, `슈팅` `유효슈팅` `오프사이드` `경고` `교체` `수비수`가 증가하면 **승리에 긍정적 영향**을 미친다는 것을 알 수 있다. 일반적으로, `볼점유율` `코너킥` `공격수`가 증가하면 공격 포인트를 잡을 수 있는 가능성이 커지기 때문에 승리에 긍정적인 영향을 줄 것이라 예상이 되는데 예상과는 반대되는 결과가 나왔다.
 
