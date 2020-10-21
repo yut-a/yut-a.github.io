@@ -12,3 +12,15 @@ tags:   Data
 ## 도구 소개
 
 BeautifulSoup에 이어 이번에는 `Selenium`을 통해 크롤링을 해보고자 한다. selenium은 웹 어플리케이션을 테스트할 때 사용하는 프레임워크로, webdriver라는 api를 통해 Chrome 브라우저를 제어할 수 있다. 일부 사이트들은 사용자가 직접 동작시키지 않으면 정보가 공개되지 않도록 설정되어 있기 때문에, 이러한 사이트에서는 태그를 기반으로 정보를 가져오는 것이 어렵다. 따라서, 동적 사이트에 대한 크롤링을 위해서는, 정적 사이트를 크롤링하는데 유용한 BeautifulSoup보다는 Selenium이 적절하다.
+
+Selenium을 사용하기 위한 과정은 다음과 같다.
+
+* [링크](https://sites.google.com/a/chromium.org/chromedriver/downloads)를 통해 자신의 Chrome 버전에 맞는 webdriver를 설치한다. `설정 -> Chrome 정보`에서 Chrome 버전을 확인할 수 있다. 다른 방법은, 주소창에 `chrome://version/`라고 치면 확인할 수 있다.
+<img width="1440" alt="스크린샷 2020-10-22 오전 1 18 33" src="https://user-images.githubusercontent.com/70478154/96748899-27cbed00-1405-11eb-8a72-428a3f954308.png">
+
+* 다음의 코드를 활용하여 Selenium을 설치한다.
+
+{% highlight ruby %}
+pip install selenium
+{% endhighlight %}
+
