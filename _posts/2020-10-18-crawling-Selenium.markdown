@@ -30,4 +30,16 @@ pip install selenium
 
 먼저, 기본적인 Selenium 사용 방법에 대해 알아보고자 한다.
 
-Selenium의 webdriver를 
+Selenium의 webdriver를 불러와 Chrome을 제어하기 위한 `driver`를 만든다. Chrome의 괄호 안에 들어간 코드는 본인 PC의 chromedriver 위치를 의미한다. `implicitly_wait`는 암묵적으로 웹 자원들이 모두 로드될 때까지 기다리게 한다. 
+
+{% highlight ruby %}
+# Selenium의 webdriver 불러오기
+from selenium import webdriver
+
+driver = webdriver.Chrome("/Users/yut_a_/Downloads/chromedriver")
+driver.implicitly_wait(3)       # 3초 기다림
+{% endhighlight %}
+
+
+
+
