@@ -36,10 +36,35 @@ Selenium의 webdriver를 불러와 Chrome을 제어하기 위한 `driver`를 만
 # Selenium의 webdriver 불러오기
 from selenium import webdriver
 
-driver = webdriver.Chrome("/Users/yut_a_/Downloads/chromedriver")
-driver.implicitly_wait(3)       # 3초 기다림
+driver = webdriver.Chrome("/Users/Downloads/chromedriver")
+driver.implicitly_wait(3)       # 3초 대기
 {% endhighlight %}
 
+`get`을 이용하여 Chrome 작동을 제어할 수 있다.
+
+{% highlight ruby %}
+# google 접속
+driver.get("https://google.com")
+
+# 네이버증권 접속
+driver.get("https://finance.naver.com/")
+{% endhighlight %}
+
+또, 다음과 같은 방법으로 로그인을 작동시킬 수 있다. `send_keys`의 큰 따옴표 안에 본인 아이디와 비밀번호를 입력하면 된다. `find_element_by_xpath`의 큰 따옴표 안에는 로그인 버튼의 `Copy full XPath`값을 입력하면 된다.
+
+{% highlight ruby %}
+# 네이버 로그인
+driver.get("https://nid.naver.com/nidlogin.login")
+
+# 아이디 / 비밀번호 입력
+driver.find_element_by_name("id").send_keys("")
+driver.find_element_by_name("pw").send_keys("")
+
+# 로그인 버튼 클릭
+driver.find_element_by_xpath("").click()
+{% endhighlight %}
+
+이상으로, 간단한 Selenium 사용법에 대해 알아보았다.
 
 
 
