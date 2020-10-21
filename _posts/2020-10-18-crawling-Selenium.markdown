@@ -24,3 +24,10 @@ Selenium을 사용하기 위한 과정은 다음과 같다.
 pip install selenium
 {% endhighlight %}
 
+이러한 과정을 거치면, Selenium을 사용할 준비가 완료된 것이다.<BR/><BR/><BR/><BR/>
+
+## 적용 과정
+
+먼저, 기본적인 Selenium 사용 방법에 대해 알아보고자 한다.
+
+Selenium의 webdriver를 
