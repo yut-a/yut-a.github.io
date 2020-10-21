@@ -15,7 +15,7 @@ BeautifulSoup에 이어 이번에는 `Selenium`을 통해 크롤링을 해보고
 
 Selenium을 사용하기 위한 과정은 다음과 같다.
 
-* [링크](https://sites.google.com/a/chromium.org/chromedriver/downloads)를 통해 자신의 Chrome 버전에 맞는 webdriver를 설치한다. `설정 -> Chrome 정보`에서 Chrome 버전을 확인할 수 있다. 다른 방법은, 주소창에 `chrome://version/`라고 치면 확인할 수 있다.
+* [링크](https://sites.google.com/a/chromium.org/chromedriver/downloads)를 통해 자신의 Chrome 버전에 맞는 chromedriver를 설치한다. `설정 -> Chrome 정보`에서 Chrome 버전을 확인할 수 있다. 다른 방법은, 주소창에 `chrome://version/`라고 치면 확인할 수 있다.
 <img width="1440" alt="스크린샷 2020-10-22 오전 1 18 33" src="https://user-images.githubusercontent.com/70478154/96748899-27cbed00-1405-11eb-8a72-428a3f954308.png">
 
 * 다음의 코드를 활용하여 Selenium을 설치한다.
