@@ -32,7 +32,7 @@ def football_game(code = ""):
     import numpy as np
     import pandas as pd
     
-    driver = webdriver.Chrome("/Users/yut_a_/Downloads/chromedriver")
+    driver = webdriver.Chrome("/Users/Downloads/chromedriver")
     driver.implicitly_wait(3)
     driver.get("https://sports.daum.net/gamecenter/" + str(code) + "/highlight")
     
