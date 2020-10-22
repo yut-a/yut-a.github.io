@@ -66,5 +66,112 @@ driver.find_element_by_xpath("").click()
 
 이상으로, 간단한 Selenium 사용법에 대해 알아보았다.
 
+이제 본격적으로 Selenium을 통해 K리그 축구 경기 데이터를 크롤링 하고자 한다. 아래의 사이트에서 각 팀 별 `경기 스코어` `경기 기록` `포메이션` 정보를 불러올 것이다.
+<img width="1440" alt="스크린샷 2020-10-22 오후 5 39 32" src="https://user-images.githubusercontent.com/70478154/96881533-55726e00-14b9-11eb-98be-f9957df61849.png">
+
+<img width="1440" alt="스크린샷 2020-10-22 오후 5 40 01" src="https://user-images.githubusercontent.com/70478154/96881560-5c997c00-14b9-11eb-82c6-b5b5cb73064d.png">
+
+<img width="1440" alt="스크린샷 2020-10-22 오후 5 40 29" src="https://user-images.githubusercontent.com/70478154/96881572-60c59980-14b9-11eb-9a88-c8b24e8cf680.png">
+
+사이트 주소를 확인한 결과, 경기에 따라 주소 중간에 경기 코드가 바뀌는 것을 확인할 수 있다. 2020년 10월 17일의 성남 vs 서울 경기는 `80042793`로 되어 있다. 이 코드를 바꿔줌으로써 매 경기의 데이터를 불러올 수 있다.
+
+먼저, 필요한 라이브러리들을 불러온 후, Chrome을 제어하기 위한 `driver`를 만든 후, 해당 사이트로 이동했다.
+
+{% highlight ruby %}
+# Selenium의 webdriver
+from selenium import webdriver
+import bs4
+
+driver = webdriver.Chrome("/Users/Downloads/chromedriver")
+driver.implicitly_wait(3)
+
+# 2020.10.17 성남 vs 서울
+driver.get("https://sports.daum.net/gamecenter/80042793/highlight")
+{% endhighlight %}
+
+다음은, Selenium과 BeaufifulSoup를 이용해 page source를 불러왔다.
+
+{% highlight ruby %}
+# page source
+html = driver.page_source
+soup = bs4.BeautifulSoup(html, "html.parser")
+{% endhighlight %}
+
+이전에 주식 종목 재무비율을 크롤링 할 때와는 다르게 데이터가 table 형태로 구성되어 있지 않다. 따라서, 필요한 데이터의 위치와 순서를 찾아 가져와야 한다. 아래와 같이 `검사`를 통해서 `팀 이름` 데이터의 구조를 파악했다.
+<img width="1440" alt="스크린샷 2020-10-22 오후 11 10 59" src="https://user-images.githubusercontent.com/70478154/96884127-227da980-14bc-11eb-8981-da3e8df5a870.png">
+
+확인한 결과, `성남`은 span 태그에 txt_team이라는 class인 것을 알 수 있다. 마찬가지의 방법으로 `서울`도 살펴보면 같은 구조를 가지는 것을 알 수 있다.
+<img width="1440" alt="스크린샷 2020-10-22 오후 11 11 46" src="https://user-images.githubusercontent.com/70478154/96884143-24476d00-14bc-11eb-8e96-e03a16553c91.png">
+
+`find_all`을 통해 데이터를 불러오면 첫 번째에는 `성남`, 두 번째에는 `서울` 데이터가 있는 것을 알 수 있다.
+
+{% highlight ruby %}
+# 팀 이름
+team_1 = soup.find_all("span", class_="txt_team")[0].text
+print(team_1)
+
+team_2 = soup.find_all("span", class_="txt_team")[1].text
+print(team_2)
+{% endhighlight %}
+<img width="36" alt="스크린샷 2020-10-22 오후 11 18 00" src="https://user-images.githubusercontent.com/70478154/96884843-f0207c00-14bc-11eb-85f9-c32e67c90a0e.png">
+
+위와 같은 방법으로 `Score`의 위치를 찾아 다음과 같이 가져올 수 있다.
+
+{% highlight ruby %}
+# 스코어
+score_1 = soup.find_all("span", class_="screen_out")[2].text
+print(score_1)
+
+score_2 = soup.find_all("span", class_="screen_out")[4].text
+print(score_2)
+{% endhighlight %}
+<img width="37" alt="스크린샷 2020-10-22 오후 11 21 56" src="https://user-images.githubusercontent.com/70478154/96885380-7dfc6700-14bd-11eb-94e4-500700d5b6f3.png">
+
+`경기 기록` 역시 같은 방법으로 위치를 찾아 불러올 수 있다. `성남`은 0과 짝수에, `서울`은 홀수에 위치해 있기 때문에 이를 구분하여 불러와 저장하면 된다.
+
+{% highlight ruby %}
+# 경기 기록
+team_1_data = []
+team_2_data = []
+
+for i in range(0, len(soup.find_all("span", class_="vs_graph"))):
+    graph = soup.find_all("span", class_="vs_graph")[i]
+    data = graph.find("span", class_="num_g").text
+    
+    if i == 0:
+        team_1_data.append(data)
+        
+    elif (i % 2) == 0:
+        team_1_data.append(data)
+    
+    else:
+        team_2_data.append(data)
+
+print(team_1_data)
+print(team_2_data)
+{% endhighlight %}
+<img width="408" alt="스크린샷 2020-10-22 오후 11 33 24" src="https://user-images.githubusercontent.com/70478154/96886926-04fe0f00-14bf-11eb-8108-4e8ed8b2d6c1.png">
+
+마지막으로 포메이션까지 불러와, 팀 별로 데이터들을 list에 저장한다.
+
+{% highlight ruby %}
+# 포메이션
+form_1 = soup.find_all("span", class_="team_info")[0].text
+form_1 = form_1.split("\n")[4]
+form_1
+
+form_2 = soup.find_all("span", class_="team_info")[1].text
+form_2 = form_2.split("\n")[4]
+form_2
+{% endhighlight %}
+<img width="60" alt="스크린샷 2020-10-22 오후 11 34 58" src="https://user-images.githubusercontent.com/70478154/96887129-3c6cbb80-14bf-11eb-9fdc-a8ff42f86a2d.png">
+
+
+
+
+
+
+
+
 
 
