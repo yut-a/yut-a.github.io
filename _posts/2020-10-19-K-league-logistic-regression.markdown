@@ -32,7 +32,11 @@ def football_game(code = ""):
     import numpy as np
     import pandas as pd
     
-    driver = webdriver.Chrome("/Users/Downloads/chromedriver")
+    # Chrome 화면을 띄우지 않고 제어하는 option
+    options = webdriver.ChromeOptions()
+    options.add_argument("headless")
+    
+    driver = webdriver.Chrome("/Users/yut_a_/Downloads/chromedriver", options = options)
     driver.implicitly_wait(3)
     driver.get("https://sports.daum.net/gamecenter/" + str(code) + "/highlight")
     
