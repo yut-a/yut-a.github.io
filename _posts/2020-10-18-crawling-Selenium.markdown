@@ -215,7 +215,7 @@ foot_ball
 {% endhighlight %}
 <img width="515" alt="스크린샷 2020-10-22 오후 11 44 12" src="https://user-images.githubusercontent.com/70478154/96888396-899d5d00-14c0-11eb-84c3-aacc7e965718.png">
 
-위의 과정을 종합하여, K리그 축구 경기 데이터를 불러올 수 있는 함수로 정리했다.
+위의 과정을 종합하여, K리그 축구 경기 데이터를 불러올 수 있는 함수로 정리했다. 반복문을 통해 한 번에 여러 경기 데이터를 불러와 정리하는데 번거롭지 않게 하기 위해 Chrome 화면을 띄우지 않고 제어하는 option을 추가했다.
 
 {% highlight ruby %}
 # 경기 데이터 추출 함수
@@ -226,7 +226,11 @@ def football_game(code = ""):
     import numpy as np
     import pandas as pd
     
-    driver = webdriver.Chrome("/Users/yut_a_/Downloads/chromedriver")
+    # Chrome 화면을 띄우지 않고 제어하는 option
+    options = webdriver.ChromeOptions()
+    options.add_argument("headless")
+    
+    driver = webdriver.Chrome("/Users/Downloads/chromedriver", options = options)
     driver.implicitly_wait(3)
     driver.get("https://sports.daum.net/gamecenter/" + str(code) + "/highlight")
     
