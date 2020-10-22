@@ -36,7 +36,7 @@ def football_game(code = ""):
     options = webdriver.ChromeOptions()
     options.add_argument("headless")
     
-    driver = webdriver.Chrome("/Users/yut_a_/Downloads/chromedriver", options = options)
+    driver = webdriver.Chrome("/Users/Downloads/chromedriver", options = options)
     driver.implicitly_wait(3)
     driver.get("https://sports.daum.net/gamecenter/" + str(code) + "/highlight")
     
