@@ -152,7 +152,7 @@ print(team_2_data)
 {% endhighlight %}
 <img width="408" alt="스크린샷 2020-10-22 오후 11 33 24" src="https://user-images.githubusercontent.com/70478154/96886926-04fe0f00-14bf-11eb-8108-4e8ed8b2d6c1.png">
 
-마지막으로 포메이션까지 불러와, 팀 별로 데이터들을 list에 저장한다.
+마지막으로 `포메이션`까지 불러와, `Score`를 제외하고 팀 별로 데이터들을 list에 저장했다.
 
 {% highlight ruby %}
 # 포메이션
@@ -165,6 +165,138 @@ form_2 = form_2.split("\n")[4]
 form_2
 {% endhighlight %}
 <img width="60" alt="스크린샷 2020-10-22 오후 11 34 58" src="https://user-images.githubusercontent.com/70478154/96887129-3c6cbb80-14bf-11eb-9fdc-a8ff42f86a2d.png">
+
+{% highlight ruby %}
+# 데이터 삽입
+team_1_data.insert(0, team_1)
+team_1_data.insert(10, form_1)
+print(team_1_data)
+
+team_2_data.insert(0, team_2)
+team_2_data.insert(10, form_2)
+print(team_2_data)
+{% endhighlight %}
+
+승, 패 예측을 위해서 `Score`를 비교하여, `승`이면 `1`, `패`면 `0`, `무승부`면 `-`로 각 팀 별 list에 저장했다. 승, 패 예측에서 각 팀 별 Score가 target에 직접적으로 영향을 주면서 모델이 제대로 만들어지지 않을 수 있기 때문에 Score 데이터를 포함시키지 않았지만, 필요에 따라 추가하여 사용하면 된다.
+
+{% highlight ruby %}
+# 승, 패 설정
+import numpy as np
+
+if score_1 > score_2:
+    team_1_data.insert(11, 1)
+    team_2_data.insert(11, 0)
+    
+elif score_1 < score_2:
+    team_1_data.insert(11, 0)
+    team_2_data.insert(11, 1)
+
+else:
+    team_1_data.insert(11, "-")
+    team_2_data.insert(11, "-")
+    
+print(team_1_data)
+print(team_2_data)
+{% endhighlight %}
+<img width="571" alt="스크린샷 2020-10-22 오후 11 41 38" src="https://user-images.githubusercontent.com/70478154/96888049-2ca1a700-14c0-11eb-8b4f-bfcf921b2606.png">
+
+각 팀 별 경기 데이터가 담긴 list를 데이터프레임으로 저장했다.
+
+{% highlight ruby %}
+import pandas as pd
+foot_ball = pd.DataFrame(columns = ["팀", "볼점유율", "슈팅", "유효슈팅", "코너킥", "파울", "오프사이드", "경고", "퇴장",
+                                   "교체", "포메이션", "결과"])
+
+foot_ball.loc[0] = team_1_data
+foot_ball.loc[1] = team_2_data
+
+foot_ball
+{% endhighlight %}
+<img width="515" alt="스크린샷 2020-10-22 오후 11 44 12" src="https://user-images.githubusercontent.com/70478154/96888396-899d5d00-14c0-11eb-84c3-aacc7e965718.png">
+
+위의 과정을 종합하여, K리그 축구 경기 데이터를 불러올 수 있는 함수로 정리했다.
+
+{% highlight ruby %}
+# 경기 데이터 추출 함수
+def football_game(code = ""):
+    
+    from selenium import webdriver
+    import bs4
+    import numpy as np
+    import pandas as pd
+    
+    driver = webdriver.Chrome("/Users/yut_a_/Downloads/chromedriver")
+    driver.implicitly_wait(3)
+    driver.get("https://sports.daum.net/gamecenter/" + str(code) + "/highlight")
+    
+    html = driver.page_source
+    soup = bs4.BeautifulSoup(html, "html.parser")
+    
+    # 팀 이름
+    team_1 = soup.find_all("span", class_="txt_team")[0].text
+    team_2 = soup.find_all("span", class_="txt_team")[1].text
+    
+    # 경기 기록
+    team_1_data = []
+    team_2_data = []
+
+    for i in range(0, len(soup.find_all("span", class_="vs_graph"))):
+        graph = soup.find_all("span", class_="vs_graph")[i]
+        data = graph.find("span", class_="num_g").text
+    
+        if i == 0:
+            team_1_data.append(data)
+        
+        elif (i % 2) == 0:
+            team_1_data.append(data)
+    
+        else:
+            team_2_data.append(data)
+            
+    # 스코어
+    score_1 = soup.find_all("span", class_="screen_out")[2].text
+    score_2 = soup.find_all("span", class_="screen_out")[4].text
+    
+    # 포메이션
+    form_1 = soup.find_all("span", class_="team_info")[0].text
+    form_1 = form_1.split("\n")[4]
+    
+    form_2 = soup.find_all("span", class_="team_info")[1].text
+    form_2 = form_2.split("\n")[4]
+    
+    # 데이터 리스트화
+    team_1_data.insert(0, team_1)
+    team_1_data.insert(10, form_1)
+    
+    team_2_data.insert(0, team_2)
+    team_2_data.insert(10, form_2)
+    
+    # 승, 패 설정
+    if score_1 > score_2:
+        team_1_data.insert(11, 1)
+        team_2_data.insert(11, 0)
+        
+    elif score_1 < score_2:
+        team_1_data.insert(11, 0)
+        team_2_data.insert(11, 1)
+    
+    else:
+        team_1_data.insert(11, "-")
+        team_2_data.insert(11, "-")
+    
+    # 데이터프레임
+    foot_ball = pd.DataFrame(columns = ["팀", "볼점유율", "슈팅", "유효슈팅", "코너킥", "파울", "오프사이드", "경고", "퇴장",
+                                   "교체", "포메이션", "결과"])
+    foot_ball.loc[0] = team_1_data
+    foot_ball.loc[1] = team_2_data
+    
+    # 창 닫기
+    driver.close()
+    
+    return foot_ball
+{% endhighlight %}
+
+
 
 
 
