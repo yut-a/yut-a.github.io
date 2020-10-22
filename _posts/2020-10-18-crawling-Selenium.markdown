@@ -176,6 +176,7 @@ team_2_data.insert(0, team_2)
 team_2_data.insert(10, form_2)
 print(team_2_data)
 {% endhighlight %}
+<img width="541" alt="스크린샷 2020-10-23 오전 12 17 11" src="https://user-images.githubusercontent.com/70478154/96892971-2cf07100-14c5-11eb-9f55-bc74253f1959.png">
 
 승, 패 예측을 위해서 `Score`를 비교하여, `승`이면 `1`, `패`면 `0`, `무승부`면 `-`로 각 팀 별 list에 저장했다. 승, 패 예측에서 각 팀 별 Score가 target에 직접적으로 영향을 주면서 모델이 제대로 만들어지지 않을 수 있기 때문에 Score 데이터를 포함시키지 않았지만, 필요에 따라 추가하여 사용하면 된다.
 
