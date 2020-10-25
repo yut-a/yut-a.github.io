@@ -73,7 +73,7 @@ kodex200 = pd.read_csv("kodex200_price.csv",            # Kodex200 ETF
                       skiprows = 4, engine = "python")
 {% endhighlight %}
 
-먼저, 경기선행지수, 수출증가율, 콜금리, CD 금리 데이터를 정리했다. 수출금액지수를 바탕으로 수출증가율을 산출했다. 경기선행지수와 수출증가율은 월 단위 데이터이기 때문에 해당 달의 데이터로 나머지 일자를 채웠다. 또한, 2020년 9월과 10월 데이터는 아직 발표되지 않았기 때문에 8월 데이터로 채웠다.
+먼저, `경기선행지수`, `수출증가율`, `콜금리`, `CD 금리` 데이터를 정리했다. 수출금액지수를 바탕으로 수출증가율을 산출했다. 경기선행지수와 수출증가율은 월 단위 데이터이기 때문에 해당 달의 데이터로 나머지 일자를 채웠다. 또한, 2020년 9월과 10월 데이터는 아직 발표되지 않았기 때문에 8월 데이터로 채웠다.
 
 {% highlight ruby %}
 # CLI, IR, EX 데이터 전처리
@@ -334,7 +334,7 @@ train_7.shape, test_7.shape
 {% endhighlight %}
 <img width="204" alt="스크린샷 2020-10-25 오후 7 41 01" src="https://user-images.githubusercontent.com/70478154/97104816-197a1b80-16fa-11eb-9b7f-e584b2a604dc.png">
 
-target 데이터의 종류 별 비중을 확인한 결과, `-1`의 빈도가 가장 높았고, baseline을 44.5%로 설정했다. 그 다음 feature와 target을 분리했다.
+target 데이터의 종류 별 비중을 확인한 결과, `-1`의 빈도가 가장 높았고, baseline을 `44.5%`로 설정했다. 그 다음 feature와 target을 분리했다.
 
 {% highlight ruby %}
 # baseline
@@ -354,7 +354,7 @@ X_test_7 = test_7[features_7]
 y_test_7 = test_7[target_7]
 {% endhighlight %}
 
-StandardScaler를 통해 정규화를 한 후, RandomForestClassifier를 진행하는 pipe를 만들었다. 또, 하이퍼 파라미터를 최적화한 모델을 만들기 위해 RandomizedSearchCV를 적용했고, cv는 15로 설정했다.
+`StandardScaler`를 통해 정규화를 한 후, `RandomForestClassifier`를 진행하는 pipe를 만들었다. 또, 하이퍼 파라미터를 최적화한 모델을 만들기 위해 `RandomizedSearchCV`를 적용했고, cv는 15로 설정했다.
 
 {% highlight ruby %}
 # 하이퍼 파라미터를 최적화한 RandomForestClassifier
@@ -417,11 +417,11 @@ print("Test set accuracy score: ", fi_pipe_7.score(X_test_7, y_test_7))
 {% endhighlight %}
 <img width="392" alt="스크린샷 2020-10-25 오후 9 08 59" src="https://user-images.githubusercontent.com/70478154/97106639-577d3c80-1706-11eb-9d3d-35965d5488ec.png">
 
-결과에 따르면, CV의 정확도는 약 29%로, train set에 overfitting이 발생했다는 것을 알 수 있다. 하이퍼 파라미터와 반복 수를 조정하는 등 다양한 방법들을 시도했으나 overfitting 문제가 해결되지 않았다. 또, test set의 정확도는 약 50%로, baseline 보다는 높지만 낮은 예측력을 보인다는 것을 알 수 있다.<BR/><BR/>
+결과에 따르면, CV의 정확도는 약 `29%`로, train set에 overfitting이 발생했다는 것을 알 수 있다. 하이퍼 파라미터와 반복 수를 조정하는 등 다양한 방법들을 시도했으나 overfitting 문제가 해결되지 않았다. 또, test set의 정확도는 약 `50%`로, baseline 보다는 높지만 낮은 예측력을 보인다는 것을 알 수 있다.<BR/><BR/>
 
 #### 한 달 뒤의 주가 방향 예측
 
-train과 test set을 분리하고 baseline을 확인했다. `1`의 빈도가 가장 높았고, baseline을 42.7%로 설정했다. 그 후 feature와 target을 분리했다.
+train과 test set을 분리하고 baseline을 확인했다. `1`의 빈도가 가장 높았고, baseline을 `42.7%`로 설정했다. 그 후 feature와 target을 분리했다.
 
 {% highlight ruby %}
 # train, test set 분리 / date 칼럼 삭제 (한 달)
@@ -511,7 +511,7 @@ print("Test set accuracy score: ", fi_pipe_30.score(X_test_30, y_test_30))
 
 #### 3개월 뒤의 주가 방향 예측
 
-train과 test set을 분리하고 baseline을 확인했다. `1`의 빈도가 가장 높았고, baseline을 41.6%로 설정했다. 그 후 feature와 target을 분리했다.
+train과 test set을 분리하고 baseline을 확인했다. `1`의 빈도가 가장 높았고, baseline을 `41.6%`로 설정했다. 그 후 feature와 target을 분리했다.
 
 {% highlight ruby %}
 # train, test set 분리 / date 칼럼 삭제 (3개월)
@@ -599,7 +599,7 @@ print("Test set accuracy score: ", fi_pipe_90.score(X_test_90, y_test_90))
 
 #### 6개월 뒤의 주가 방향 예측
 
-train과 test set을 분리하고 baseline을 확인했다. `-1`의 빈도가 가장 높았고, baseline을 40.2%로 설정했다. 그 후 feature와 target을 분리했다.
+train과 test set을 분리하고 baseline을 확인했다. `-1`의 빈도가 가장 높았고, baseline을 `40.2%`로 설정했다. 그 후 feature와 target을 분리했다.
 
 {% highlight ruby %}
 # train, test set 분리 / date 칼럼 삭제 (6개월)
