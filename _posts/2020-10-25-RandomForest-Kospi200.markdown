@@ -507,18 +507,103 @@ print("Test set accuracy score: ", fi_pipe_30.score(X_test_30, y_test_30))
 {% endhighlight %}
 <img width="394" alt="스크린샷 2020-10-25 오후 9 25 06" src="https://user-images.githubusercontent.com/70478154/97107021-98765080-1708-11eb-8ec9-df7a94748544.png">
 
-결과에 따르면, 
+결과에 따르면, 여전히 Overfitting 문제가 존재하지만, 시기를 더 길게 조정했을 때, test set의 정확도가 올라간 것을 확인할 수 있다.<BR/><BR/>
 
+#### 3개월 뒤의 주가 방향 예측
 
+train과 test set을 분리하고 baseline을 확인했다. `1`의 빈도가 가장 높았고, baseline을 41.6%로 설정했다. 그 후 feature와 target을 분리했다.
 
+{% highlight ruby %}
+# train, test set 분리 / date 칼럼 삭제 (3개월)
+train_90 = finance_90[finance_90["date"] < "2018.04.01"].drop("date", axis = 1)
+test_90 = finance_90[finance_90["date"] >= "2018.04.01"].drop("date", axis = 1)
 
+train_90.shape, test_90.shape
+{% endhighlight %}
+<img width="198" alt="스크린샷 2020-10-25 오후 9 28 09" src="https://user-images.githubusercontent.com/70478154/97107093-0589e600-1709-11eb-8184-8dade91ab64b.png">
 
+{% highlight ruby %}
+# baseline
+train_90["predict"].value_counts(normalize = True)
+{% endhighlight %}
+<img width="262" alt="스크린샷 2020-10-25 오후 9 28 47" src="https://user-images.githubusercontent.com/70478154/97107110-1cc8d380-1709-11eb-8333-57bf646a4f3e.png">
 
+{% highlight ruby %}
+# features, target 분리
+target_90 = "predict"
+features_90 = train_90.drop(columns = [target_90]).columns
 
+X_train_90 = train_90[features_90]
+y_train_90 = train_90[target_90]
 
+X_test_90 = test_90[features_90]
+y_test_90 = test_90[target_90]
+{% endhighlight %}
 
+역시 최적 하이퍼 파라미터를 찾기 위해 RandomizedSearchCV를 적용했다. 최적 하이퍼 파라미터와 Cross Validation 평균 정확도를 산출한 후, 최적 하이퍼 파라미터를 적용한 모델을 train set에 재학습시키고 train과 test set의 정확도를 산출했다.
 
+{% highlight ruby %}
+# 하이퍼 파라미터를 최적화한 RandomForestClassifier
+pipe_90 = make_pipeline(
+    StandardScaler(),
+    RandomForestClassifier(random_state = 999)
+)
 
+dists = {
+    "randomforestclassifier__n_estimators" : randint(50, 1000),
+    "randomforestclassifier__max_depth" : [5, 10, 15, 20, 25, None],
+    "randomforestclassifier__max_leaf_nodes" : [10, 20, 30, 40],
+    "randomforestclassifier__max_features" : randint(1, 10),
+    "randomforestclassifier__min_samples_leaf" : randint(1, 10)
+}
+
+clf_90 = RandomizedSearchCV(
+    pipe_90,
+    param_distributions = dists,
+    n_iter = 100,
+    cv = 15,
+    scoring = "accuracy",
+    verbose = 1,
+    n_jobs = -1,
+    random_state = 999
+)
+
+clf_90.fit(X_train_90, y_train_90);
+{% endhighlight %}
+
+{% highlight ruby %}
+# 최적 하이퍼 파라미터 / CV score
+print("최적 하이퍼파라미터: ", clf_90.best_params_)
+print("accuracy score: ", clf_90.best_score_)
+
+pipe_90 = clf_90.best_estimator_
+{% endhighlight %}
+<img width="979" alt="스크린샷 2020-10-25 오후 9 32 46" src="https://user-images.githubusercontent.com/70478154/97107202-ab3d5500-1709-11eb-87ad-cf739a924126.png">
+
+{% highlight ruby %}
+# 최적 하이퍼 파라미터를 적용한 모델의 train, test set 정확도
+fi_pipe_90 = make_pipeline(
+    StandardScaler(),
+    RandomForestClassifier(n_estimators = 89, max_depth = 5, max_features = 1, max_leaf_nodes = 20,
+                               min_samples_leaf = 5, n_jobs = -1, random_state = 999)
+)
+
+fi_pipe_90.fit(X_train_90, y_train_90)
+print("Train set accuracy score: ", fi_pipe_90.score(X_train_90, y_train_90))
+
+print("Test set accuracy score: ", fi_pipe_90.score(X_test_90, y_test_90))
+{% endhighlight %}
+<img width="385" alt="스크린샷 2020-10-25 오후 9 33 34" src="https://user-images.githubusercontent.com/70478154/97107227-c5773300-1709-11eb-8109-d098f31e4a9c.png">
+
+결과에 따르면, 위의 결과보다는 Overfitting이 약간 줄었고, test set의 정확도가 증가했음을 알 수 있다.<BR/><BR/>
+
+#### 6개월 뒤의 주가 방향 예측
+
+train과 test set을 분리하고 baseline을 확인했다. `-1`의 빈도가 가장 높았고, baseline을 40.2%로 설정했다. 그 후 feature와 target을 분리했다.
+
+{% highlight ruby %}
+
+{% endhighlight %}
 
 
 
