@@ -602,8 +602,91 @@ print("Test set accuracy score: ", fi_pipe_90.score(X_test_90, y_test_90))
 train과 test set을 분리하고 baseline을 확인했다. `-1`의 빈도가 가장 높았고, baseline을 40.2%로 설정했다. 그 후 feature와 target을 분리했다.
 
 {% highlight ruby %}
+# train, test set 분리 / date 칼럼 삭제 (6개월)
+train_180 = finance_180[finance_180["date"] < "2017.11.01"].drop("date", axis = 1)
+test_180 = finance_180[finance_180["date"] >= "2017.11.01"].drop("date", axis = 1)
 
+train_180.shape, test_180.shape
 {% endhighlight %}
+<img width="199" alt="스크린샷 2020-10-25 오후 9 37 06" src="https://user-images.githubusercontent.com/70478154/97107318-43d3d500-170a-11eb-8e1f-c541b62bc97a.png">
+
+{% highlight ruby %}
+# baseline
+train_180["predict"].value_counts(normalize = True)
+{% endhighlight %}
+<img width="255" alt="스크린샷 2020-10-25 오후 9 38 29" src="https://user-images.githubusercontent.com/70478154/97107364-754ca080-170a-11eb-8803-88972f286ad8.png">
+
+{% highlight ruby %}
+# features, target 분리
+target_180 = "predict"
+features_180 = train_180.drop(columns = [target_180]).columns
+
+X_train_180 = train_180[features_180]
+y_train_180 = train_180[target_180]
+
+X_test_180 = test_180[features_180]
+y_test_180 = test_180[target_180]
+{% endhighlight %}
+
+마지막으로, 최적 하이퍼 파라미터를 찾기 위해 RandomizedSearchCV를 적용했다. 최적 하이퍼 파라미터와 Cross Validation 평균 정확도를 산출한 후, 최적 하이퍼 파라미터를 적용한 모델을 train set에 재학습시키고 train과 test set의 정확도를 산출했다.
+
+{% highlight ruby %}
+# 하이퍼 파라미터를 최적화한 RandomForestClassifier
+pipe_180 = make_pipeline(
+    StandardScaler(),
+    RandomForestClassifier(random_state = 999)
+)
+
+dists = {
+    "randomforestclassifier__n_estimators" : randint(50, 1000),
+    "randomforestclassifier__max_depth" : [5, 10, 15, 20, 25, None],
+    "randomforestclassifier__max_leaf_nodes" : [10, 20, 30, 40],
+    "randomforestclassifier__max_features" : randint(1, 10),
+    "randomforestclassifier__min_samples_leaf" : randint(1, 10)
+}
+
+clf_180 = RandomizedSearchCV(
+    pipe_180,
+    param_distributions = dists,
+    n_iter = 100,
+    cv = 15,
+    scoring = "accuracy",
+    verbose = 1,
+    n_jobs = -1,
+    random_state = 999
+)
+
+clf_180.fit(X_train_180, y_train_180);
+{% endhighlight %}
+
+{% highlight ruby %}
+# 최적 하이퍼 파라미터 / CV score
+print("최적 하이퍼파라미터: ", clf_180.best_params_, "\n")
+print("CV accuracy score: ", clf_180.best_score_)
+
+pipe_180 = clf_180.best_estimator_
+{% endhighlight %}
+<img width="981" alt="스크린샷 2020-10-25 오후 9 41 21" src="https://user-images.githubusercontent.com/70478154/97107433-dd02eb80-170a-11eb-9e0d-3ba6bf2d6286.png">
+
+{% highlight ruby %}
+# 최적 하이퍼 파라미터를 적용한 모델의 train, test set 정확도
+fi_pipe_180 = make_pipeline(
+    StandardScaler(),
+    RandomForestClassifier(n_estimators = 561, max_depth = 7, max_features = 7, max_leaf_nodes = 10,
+                               min_samples_leaf = 6, n_jobs = -1, random_state = 999)
+)
+
+fi_pipe_180.fit(X_train_180, y_train_180)
+print("Train set accuracy score: ", fi_pipe_180.score(X_train_180, y_train_180))
+
+print("Test set accuracy score: ", fi_pipe_180.score(X_test_180, y_test_180))
+{% endhighlight %}
+<img width="393" alt="스크린샷 2020-10-25 오후 9 43 00" src="https://user-images.githubusercontent.com/70478154/97107467-19364c00-170b-11eb-8510-3c738f328bef.png">
+
+결과에 따르면, 3개월 뒤의 주가 방향 예측 결과보다 test set의 정확도가 살짝 하락했지만, 이전의 결과들에 비해 Overfitting 문제가 가장 많이 줄어들었음을 알 수 있다.
+
+
+
 
 
 
