@@ -319,10 +319,39 @@ finance_180
 {% endhighlight %}
 <img width="982" alt="스크린샷 2020-10-25 오후 7 30 08" src="https://user-images.githubusercontent.com/70478154/97104607-8ab8cf00-16f8-11eb-9e69-b564cb03cd32.png">
 
-시기에 따라 target 데이터가 `1, 0, -1`로 정리된 것을 확인할 수 있다.
+시기에 따라 target 데이터가 `1, 0, -1`로 정리된 것을 확인할 수 있다. 이제 본격적으로 RandomForest model을 적용해보고자 한다.
 
+#### 일주일 뒤의 주가 방향 예측
 
+train과 test set을 8:2로 분리했다.
 
+{% highlight ruby %}
+# train, test set 분리 / date 칼럼 삭제 (일주일)
+train_7 = finance_7[finance_7["date"] < "2018.07.01"].drop("date", axis = 1)
+test_7 = finance_7[finance_7["date"] >= "2018.07.01"].drop("date", axis = 1)
 
+train_7.shape, test_7.shape
+{% endhighlight %}
+<img width="204" alt="스크린샷 2020-10-25 오후 7 41 01" src="https://user-images.githubusercontent.com/70478154/97104816-197a1b80-16fa-11eb-9b7f-e584b2a604dc.png">
+
+target 데이터의 종류 별 비중을 확인한 결과, `-1`의 빈도가 가장 높았고, baseline을 44.5%로 설정했다. 그 다음 feature와 target을 분리했다.
+
+{% highlight ruby %}
+# baseline
+train_7["predict"].value_counts(normalize = True)
+{% endhighlight %}
+<img width="257" alt="스크린샷 2020-10-25 오후 7 43 26" src="https://user-images.githubusercontent.com/70478154/97104862-63fb9800-16fa-11eb-95de-276f60e709e5.png">
+
+{% highlight ruby %}
+# features, target 분리
+target_7 = "predict"
+features_7 = train_7.drop(columns = [target_7]).columns
+
+X_train_7 = train_7[features_7]
+y_train_7 = train_7[target_7]
+
+X_test_7 = test_7[features_7]
+y_test_7 = test_7[target_7]
+{% endhighlight %}
 
 
