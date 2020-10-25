@@ -683,7 +683,26 @@ print("Test set accuracy score: ", fi_pipe_180.score(X_test_180, y_test_180))
 {% endhighlight %}
 <img width="393" alt="스크린샷 2020-10-25 오후 9 43 00" src="https://user-images.githubusercontent.com/70478154/97107467-19364c00-170b-11eb-8510-3c738f328bef.png">
 
-결과에 따르면, 3개월 뒤의 주가 방향 예측 결과보다 test set의 정확도가 살짝 하락했지만, 이전의 결과들에 비해 Overfitting 문제가 가장 많이 줄어들었음을 알 수 있다.<BR/><BR/><BR/><BR/>
+결과에 따르면, 3개월 뒤의 주가 방향 예측 결과보다 test set의 정확도가 살짝 하락했지만, 이전의 결과들에 비해 Overfitting 문제가 가장 많이 줄어들었음을 알 수 있다.
+
+그렇다면, 어떤 특성들이 예측에 중요한 정보를 제공했는지 알아보기 위해 `특성 중요도`를 확인했다.
+
+{% highlight ruby %}
+# 특성 중요도
+rf = fi_pipe_180.named_steps["randomforestclassifier"]
+colnames = X_train_180.columns
+importances = pd.Series(rf.feature_importances_, colnames)
+
+n = 18
+plt.figure(figsize = (10, n/4))
+plt.title("Features importances")
+importances.sort_values()[-n:].plot.barh();
+{% endhighlight %}
+<img width="663" alt="스크린샷 2020-10-25 오후 11 20 15" src="https://user-images.githubusercontent.com/70478154/97109808-af24a380-1718-11eb-848d-41cab92382b8.png">
+
+그래프에 따르면, `원/달러 환율` `경기선행지수` `국채 3년`이 가장 큰 중요도를 가지고 있다는 것을 확인할 수 있다. 뒤이어, `WTI 선물`과 Nikkei, DOW, DAX, FTSE 등 `주요 해외 증시`, `콜 금리`와 `CD 금리`가 중요도가 높다는 것을 확인할 수 있다. 주로 **국내 경제, 금융 지표들**이 6개월 뒤의 주가 방향 예측에 중요한 요소들로 작용한다는 것을 예상해 볼 수 있다.
+
+<BR/><BR/><BR/><BR/>
 
 ## 결론
 
