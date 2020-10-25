@@ -683,9 +683,11 @@ print("Test set accuracy score: ", fi_pipe_180.score(X_test_180, y_test_180))
 {% endhighlight %}
 <img width="393" alt="스크린샷 2020-10-25 오후 9 43 00" src="https://user-images.githubusercontent.com/70478154/97107467-19364c00-170b-11eb-8510-3c738f328bef.png">
 
-결과에 따르면, 3개월 뒤의 주가 방향 예측 결과보다 test set의 정확도가 살짝 하락했지만, 이전의 결과들에 비해 Overfitting 문제가 가장 많이 줄어들었음을 알 수 있다.
+결과에 따르면, 3개월 뒤의 주가 방향 예측 결과보다 test set의 정확도가 살짝 하락했지만, 이전의 결과들에 비해 Overfitting 문제가 가장 많이 줄어들었음을 알 수 있다.<BR/><BR/><BR/><BR/>
 
+## 결론
 
+결과를 종합하면, 상대적으로 낮은 Overfitting 문제와 높은 예측력을 보인 **6개월 뒤의 주가 방향 예측 모델**이 가장 효과적이라고 할 수 있다. 이 모델에 따르면 
 
 
 
