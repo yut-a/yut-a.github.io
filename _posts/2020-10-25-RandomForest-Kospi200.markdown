@@ -186,7 +186,7 @@ finance
 {% endhighlight %}
 <img width="985" alt="스크린샷 2020-10-25 오후 7 15 53" src="https://user-images.githubusercontent.com/70478154/97104345-8f7c8380-16f6-11eb-8c74-dfc7a112dc86.png">
 
-마지막으로, 분석을 용이하게 하기 위해 숫자형으로 데이터 타입을 변경했다.
+분석을 용이하게 하기 위해 숫자형으로 데이터 타입을 변경했다.
 
 {% highlight ruby %}
 # 숫자형으로 데이터 타입 변경
@@ -205,6 +205,121 @@ finance.dtypes
 {% endhighlight %}
 <img width="274" alt="스크린샷 2020-10-25 오후 7 17 20" src="https://user-images.githubusercontent.com/70478154/97104373-c05cb880-16f6-11eb-9187-129e1590bbb4.png">
 
+이제 target을 시기에 맞게 `일주일` `한달` `3개월` `6개월` 4가지로 변경했다. 시기가 길어질수록 데이터의 크기가 조금씩 줄어드는 것을 알 수 있다. 이는 시기가 길어질수록 더 많은 최근 데이터가 사라지기 때문이다.
+
+{% highlight ruby %}
+ # target 변경 (target = 일주일 후)
+finance_7 = finance.copy()
+
+finance_7["lag_1"] = finance_7["price"].shift()
+finance_7["lag_8"] = finance_7["lag_1"].shift(7)
+finance_7["price_pred(%)"] = round((finance_7["lag_8"] - finance_7["lag_1"]) / finance_7["lag_1"] * 100, 2)
+
+def rate_7(x):
+    if x >= 1:
+        return 1
+    
+    elif x > 0:
+        return 0
+    
+    elif x <= 0:
+        return -1
+    
+finance_7["predict"] = finance_7["price_pred(%)"].apply(rate_7)
+finance_7 = finance_7.dropna(axis = 0).reset_index(drop = True)
+finance_7 = finance_7.astype({"predict" : "int"})
+
+finance_7 = finance_7.drop(["price", "lag_1", "lag_8", "price_pred(%)"], axis = 1)
+
+finance_7
+{% endhighlight %}
+<img width="985" alt="스크린샷 2020-10-25 오후 7 26 49" src="https://user-images.githubusercontent.com/70478154/97104552-154cfe80-16f8-11eb-9ecf-1b0febb8f057.png">
+
+{% highlight ruby %}
+# target 변경 (target = 한 달 후)
+finance_30 = finance.copy()
+
+finance_30["lag_1"] = finance_30["price"].shift()
+finance_30["lag_31"] = finance_30["lag_1"].shift(30)
+finance_30["price_pred(%)"] = round((finance_30["lag_31"] - finance_30["lag_1"]) / finance_30["lag_1"] * 100, 2)
+
+def rate_30(x):
+    if x >= 2:
+        return 1
+    
+    elif x > 0:
+        return 0
+    
+    elif x <= 0:
+        return -1
+    
+finance_30["predict"] = finance_30["price_pred(%)"].apply(rate_30)
+finance_30 = finance_30.dropna(axis = 0).reset_index(drop = True)
+finance_30 = finance_30.astype({"predict" : "int"})
+
+finance_30 = finance_30.drop(["price", "lag_1", "lag_31", "price_pred(%)"], axis = 1)
+
+finance_30
+{% endhighlight %}
+<img width="982" alt="스크린샷 2020-10-25 오후 7 27 55" src="https://user-images.githubusercontent.com/70478154/97104568-3a417180-16f8-11eb-9b69-0a6b9b29bcdd.png">
+
+{% highlight ruby %}
+# target 변경 (target = 3개월 후)
+finance_90 = finance.copy()
+
+finance_90["lag_1"] = finance_90["price"].shift()
+finance_90["lag_91"] = finance_90["lag_1"].shift(90)
+finance_90["price_pred(%)"] = round((finance_90["lag_91"] - finance_90["lag_1"]) / finance_90["lag_1"] * 100, 2)
+
+def rate_90(x):
+    if x >= 4:
+        return 1
+    
+    elif x > 0:
+        return 0
+    
+    elif x <= 0:
+        return -1
+    
+finance_90["predict"] = finance_90["price_pred(%)"].apply(rate_90)
+finance_90 = finance_90.dropna(axis = 0).reset_index(drop = True)
+finance_90 = finance_90.astype({"predict" : "int"})
+
+finance_90 = finance_90.drop(["price", "lag_1", "lag_91", "price_pred(%)"], axis = 1)
+
+finance_90
+{% endhighlight %}
+<img width="981" alt="스크린샷 2020-10-25 오후 7 28 45" src="https://user-images.githubusercontent.com/70478154/97104586-59d89a00-16f8-11eb-9707-b7b4e4d7a3cf.png">
+
+{% highlight ruby %}
+# target 변경 (target = 6개월 후)
+finance_180 = finance.copy()
+
+finance_180["lag_1"] = finance_180["price"].shift()
+finance_180["lag_181"] = finance_180["lag_1"].shift(180)
+finance_180["price_pred(%)"] = round((finance_180["lag_181"] - finance_180["lag_1"]) / finance_180["lag_1"] * 100, 2)
+
+def rate_180(x):
+    if x >= 6:
+        return 1
+    
+    elif x > 0:
+        return 0
+    
+    elif x <= 0:
+        return -1
+    
+finance_180["predict"] = finance_180["price_pred(%)"].apply(rate_180)
+finance_180 = finance_180.dropna(axis = 0).reset_index(drop = True)
+finance_180 = finance_180.astype({"predict" : "int"})
+
+finance_180 = finance_180.drop(["price", "lag_1", "lag_181", "price_pred(%)"], axis = 1)
+
+finance_180
+{% endhighlight %}
+<img width="982" alt="스크린샷 2020-10-25 오후 7 30 08" src="https://user-images.githubusercontent.com/70478154/97104607-8ab8cf00-16f8-11eb-9e69-b564cb03cd32.png">
+
+시기에 따라 target 데이터가 `1, 0, -1`로 정리된 것을 확인할 수 있다.
 
 
 
