@@ -354,4 +354,174 @@ X_test_7 = test_7[features_7]
 y_test_7 = test_7[target_7]
 {% endhighlight %}
 
+StandardScaler를 통해 정규화를 한 후, RandomForestClassifier를 진행하는 pipe를 만들었다. 또, 하이퍼 파라미터를 최적화한 모델을 만들기 위해 RandomizedSearchCV를 적용했고, cv는 15로 설정했다.
+
+{% highlight ruby %}
+# 하이퍼 파라미터를 최적화한 RandomForestClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import RandomizedSearchCV
+from scipy.stats import randint
+
+pipe_7 = make_pipeline(
+    StandardScaler(),
+    RandomForestClassifier(random_state = 999)
+)
+
+dists = {
+    "randomforestclassifier__n_estimators" : randint(50, 1000),
+    "randomforestclassifier__max_depth" : [5, 10, 15, 20, 25, None],
+    "randomforestclassifier__max_leaf_nodes" : [10, 20, 30, 40],
+    "randomforestclassifier__max_features" : randint(1, 10),
+    "randomforestclassifier__min_samples_leaf" : randint(1, 10)
+}
+
+clf_7 = RandomizedSearchCV(
+    pipe_7,
+    param_distributions = dists,
+    n_iter = 100,
+    cv = 15,
+    scoring = "accuracy",
+    verbose = 1,
+    n_jobs = -1,
+    random_state = 999
+)
+
+clf_7.fit(X_train_7, y_train_7);
+{% endhighlight %}
+
+최적 하이퍼 파라미터와 Cross Validation 평균 정확도를 산출한 후, 최적 하이퍼 파라미터를 적용한 모델을 train set에 재학습시키고 train과 test set의 정확도를 산출했다.
+
+{% highlight ruby %}
+# 최적 하이퍼 파라미터 / CV score
+print("최적 하이퍼파라미터: ", clf_7.best_params_, "\n")
+print("CV accuracy score: ", clf_7.best_score_)
+
+pipe_7 = clf_7.best_estimator_
+{% endhighlight %}
+<img width="977" alt="스크린샷 2020-10-25 오후 9 04 14" src="https://user-images.githubusercontent.com/70478154/97106555-c7d78e00-1705-11eb-9b7f-136a5dbfcbf6.png">
+
+{% highlight ruby %}
+# 최적 하이퍼 파라미터를 적용한 모델의 train, test set 정확도
+fi_pipe_7 = make_pipeline(
+    StandardScaler(),
+    RandomForestClassifier(n_estimators = 454, max_depth = 5, max_features = 1, max_leaf_nodes = 10,
+                               min_samples_leaf = 8, n_jobs = -1, random_state = 999)
+)
+
+fi_pipe_7.fit(X_train_7, y_train_7)
+print("Train set accuracy score: ", fi_pipe_7.score(X_train_7, y_train_7))
+
+print("Test set accuracy score: ", fi_pipe_7.score(X_test_7, y_test_7))
+{% endhighlight %}
+<img width="392" alt="스크린샷 2020-10-25 오후 9 08 59" src="https://user-images.githubusercontent.com/70478154/97106639-577d3c80-1706-11eb-9d3d-35965d5488ec.png">
+
+결과에 따르면, CV의 정확도는 약 29%로, train set에 overfitting이 발생했다는 것을 알 수 있다. 하이퍼 파라미터와 반복 수를 조정하는 등 다양한 방법들을 시도했으나 overfitting 문제가 해결되지 않았다. 또, test set의 정확도는 약 50%로, baseline 보다는 높지만 낮은 예측력을 보인다는 것을 알 수 있다.<BR/><BR/>
+
+#### 한 달 뒤의 주가 방향 예측
+
+train과 test set을 분리하고 baseline을 확인했다. `1`의 빈도가 가장 높았고, baseline을 42.7%로 설정했다. 그 후 feature와 target을 분리했다.
+
+{% highlight ruby %}
+# train, test set 분리 / date 칼럼 삭제 (한 달)
+train_30 = finance_30[finance_30["date"] < "2018.05.01"].drop("date", axis = 1)
+test_30 = finance_30[finance_30["date"] >= "2018.05.01"].drop("date", axis = 1)
+
+train_30.shape, test_30.shape
+{% endhighlight %}
+<img width="202" alt="스크린샷 2020-10-25 오후 9 16 49" src="https://user-images.githubusercontent.com/70478154/97106872-75976c80-1707-11eb-82a8-4ec12287274d.png">
+
+{% highlight ruby %}
+# baseline
+train_30["predict"].value_counts(normalize = True)
+{% endhighlight %}
+<img width="260" alt="스크린샷 2020-10-25 오후 9 17 42" src="https://user-images.githubusercontent.com/70478154/97106886-8f38b400-1707-11eb-8086-fc03693ba24a.png">
+
+{% highlight ruby %}
+# features, target 분리
+target_30 = "predict"
+features_30 = train_30.drop(columns = [target_30]).columns
+
+X_train_30 = train_30[features_30]
+y_train_30 = train_30[target_30]
+
+X_test_30 = test_30[features_30]
+y_test_30 = test_30[target_30]
+{% endhighlight %}
+
+마찬가지의 방식으로, 최적 하이퍼 파라미터를 찾기 위해 RandomizedSearchCV를 적용했다.
+
+{% highlight ruby %}
+# 하이퍼 파라미터를 최적화한 RandomForestClassifier
+pipe_30 = make_pipeline(
+    StandardScaler(),
+    RandomForestClassifier(random_state = 999)
+)
+
+dists = {
+    "randomforestclassifier__n_estimators" : randint(50, 1000),
+    "randomforestclassifier__max_depth" : [5, 10, 15, 20, 25, None],
+    "randomforestclassifier__max_leaf_nodes" : [10, 20, 30, 40],
+    "randomforestclassifier__max_features" : randint(1, 10),
+    "randomforestclassifier__min_samples_leaf" : randint(1, 10)
+}
+
+clf_30 = RandomizedSearchCV(
+    pipe_30,
+    param_distributions = dists,
+    n_iter = 100,
+    cv = 15,
+    scoring = "accuracy",
+    verbose = 1,
+    n_jobs = -1,
+    random_state = 999
+)
+
+clf_30.fit(X_train_30, y_train_30);
+{% endhighlight %}
+
+최적 하이퍼 파라미터와 Cross Validation 평균 정확도를 산출한 후, 최적 하이퍼 파라미터를 적용한 모델을 train set에 재학습시키고 train과 test set의 정확도를 산출했다.
+
+{% highlight ruby %}
+# 최적 하이퍼 파라미터 / CV score
+print("최적 하이퍼파라미터: ", clf_30.best_params_, "\n")
+print("CV accuracy score: ", clf_30.best_score_)
+
+pipe_30 = clf_30.best_estimator_
+{% endhighlight %}
+<img width="977" alt="스크린샷 2020-10-25 오후 9 23 22" src="https://user-images.githubusercontent.com/70478154/97106988-5947ff80-1708-11eb-8f8c-0f3f55750685.png">
+
+{% highlight ruby %}
+# 최적 하이퍼 파라미터를 적용한 모델의 train, test set 정확도
+fi_pipe_30 = make_pipeline(
+    StandardScaler(),
+    RandomForestClassifier(n_estimators = 224, max_depth = 20, max_features = 8, max_leaf_nodes = 10,
+                               min_samples_leaf = 1, n_jobs = -1, random_state = 999)
+)
+
+fi_pipe_30.fit(X_train_30, y_train_30)
+print("Train set accuracy score: ", fi_pipe_30.score(X_train_30, y_train_30))
+
+print("Test set accuracy score: ", fi_pipe_30.score(X_test_30, y_test_30))
+{% endhighlight %}
+<img width="394" alt="스크린샷 2020-10-25 오후 9 25 06" src="https://user-images.githubusercontent.com/70478154/97107021-98765080-1708-11eb-8ec9-df7a94748544.png">
+
+결과에 따르면, 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
