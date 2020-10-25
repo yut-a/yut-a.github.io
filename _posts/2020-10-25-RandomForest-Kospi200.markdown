@@ -44,12 +44,34 @@ target 데이터인 Kospi200은 Kodex200 ETF의 주가를 활용했다. 일자 �
 * `VIX` : S&P500 지수옵션의 향후 30일 간의 변동성에 대한 시장의 기대를 나타낸 지수이다.
 * `VKOSPI`: KOSPI200 지수옵션의 미래변동성을 측정한 지수이다.
 
-target 기준에 따라 대략 2009년 4월부터 각각 2020년 1월, 6월, 9월, 10월까지의 데이터를 활용했다.
+target 기준에 따라 대략 2009년 4월부터 각각 2020년 1월, 6월, 9월, 10월까지의 데이터를 활용했다.<BR/><BR/><BR/><BR/>
 
+## 적용 과정
 
+{% highlight ruby %}
+# 데이터 불러오기
+import pandas as pd
 
-
-
+CLI = pd.read_csv("CLI.csv", encoding = "cp949")        # 경기선행지수
+EX = pd.read_csv("Export.csv", encoding = "cp949")      # 수출금액지수
+IR = pd.read_csv("IR.csv", encoding = "cp949")          # 콜금리, CD 금리
+DAX = pd.read_csv("DAX_futures.csv")                    # 독일 DAX 선물
+DOW = pd.read_csv("dow_futures.csv")                    # 미국 DOW 선물
+EUR_USD = pd.read_csv("EUR_USD.csv")                    # 유로/달러 환율
+FTSE = pd.read_csv("FTSE_futures.csv")                  # 영국 FTSE 선물
+Gold = pd.read_csv("gold_futures.csv")                  # 금 선물
+Korea_3Y_bond = pd.read_csv("Korea_3Y_bond.csv")        # 국채 3년
+Nikkei = pd.read_csv("Nikkei225_futures.csv")           # 일본 Nikkei225 선물
+US_3Y_bond = pd.read_csv("US_3Y_bond.csv")              # 미국 국채 3년
+US_10Y_bond = pd.read_csv("US_10Y_bond.csv")            # 미국 국채 10년
+USD_index = pd.read_csv("USD_futures.csv")              # 달러 선물 인덱스
+USD_KRW = pd.read_csv("USD_KRW.csv")                    # 원/달러 환율
+VIX = pd.read_csv("VIX.csv")                            # VIX
+VKOSPI = pd.read_csv("VKOSPI.csv")                      # KOSPI Volatility
+WTI = pd.read_csv("WTI_futures.csv")                    # WTI 선물
+kodex200 = pd.read_csv("kodex200_price.csv",            # Kodex200 ETF
+                      skiprows = 4, engine = "python")
+{% endhighlight %}
 
 
 
