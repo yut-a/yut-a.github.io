@@ -319,7 +319,7 @@ finance_180
 {% endhighlight %}
 <img width="982" alt="스크린샷 2020-10-25 오후 7 30 08" src="https://user-images.githubusercontent.com/70478154/97104607-8ab8cf00-16f8-11eb-9e69-b564cb03cd32.png">
 
-시기에 따라 target 데이터가 `1, 0, -1`로 정리된 것을 확인할 수 있다. 이제 본격적으로 RandomForest model을 적용해보고자 한다.
+시기에 따라 target 데이터가 `1, 0, -1`로 정리된 것을 확인할 수 있다. 이제 본격적으로 RandomForest model을 적용해보고자 한다.<BR/>
 
 #### 일주일 뒤의 주가 방향 예측
 
