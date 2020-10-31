@@ -105,7 +105,7 @@ data.head()
 {% endhighlight %}
 <img width="719" alt="스크린샷 2020-10-01 오후 1 19 48" src="https://user-images.githubusercontent.com/70478154/94767916-db365880-03e8-11eb-8261-d2de51fcf62e.png">
 
-다음은, index 이름을 깔끔하게 정리했다. `(`를 기준으로 분리하여 필요한 이름을 추출했다.
+다음은, index 이름을 깔끔하게 정리했다. 은행, 증권, 카드 등 금융 관련 종목들은 
 
 {% highlight ruby %}
 # index name 정리
