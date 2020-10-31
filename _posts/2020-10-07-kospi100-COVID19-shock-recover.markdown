@@ -67,7 +67,7 @@ def stock_info(stock_code = ""):
     
     # DataFrame 변환 / 필요없는 행 제거
     df = pd.DataFrame(p, columns = p[0])
-    num = df.index[df.iloc[:,0].isin(["안정성비율", "성장성비율", "수익성비율", "활동성비율"])]
+    num = df.index[df.iloc[:,0].isin(["안정성비율", "성장성비율", "수익성비율", "활동성비율"])]   # IFRS(연결), IFRS(별도) 두 종류이기 때문
     df = df.drop(num, axis = 0)
     df = df.drop(0, axis = 0)
     df = df.reset_index(drop = True)
@@ -83,19 +83,40 @@ def stock_info(stock_code = ""):
     data = data.reset_index(drop = True)
     
     # index name 정리 및 적용
+    list_finance_1 = ['유동비율', '당좌비율', '부채비율', '유보율', '순차입금비율', '이자보상배율', '자기자본비율', '매출액증가율',
+                  '판매비와관리비증가율', '영업이익증가율', 'EBITDA증가율', 'EPS증가율', '매출총이익율', '세전계속사업이익률',
+                  '영업이익률', 'EBITDA마진율', 'ROA', 'ROE', 'ROIC', '총자산회전율', '총부채회전율', '총자본회전율',
+                  '순운전자본회전율']
+    list_finance_2 = ['예대율', '유가증권보유율', '부채비율', '유보율', '순영업손익증가율', '영업이익증가율', '지배주주순이익증가율',
+                  'EPS증가율', '영업이익률', 'ROA', 'ROE']
+
     list_a = []
     
-    for j in range(0, len(data)):
-        spl = data.iloc[:,0][j].split("(")
-        list_a.append(spl[0])
-        
+    if len(data) == 23:
+        for i in range(0, len(data)):
+            if (list_finance_1[i] in data.iloc[:,0][i]) == True:
+                list_a.append(list_finance_1[i])
+                
+    else:
+        for j in range(0, len(data)):
+            if (list_finance_2[j] in data.iloc[:,0][j]) == True:
+                list_a.append(list_finance_2[j])
+
     if data.columns[0] == "IFRS(연결)":
-      data = data.drop(["IFRS(연결)"], axis = 1)
-      data.insert(0, "IFRS(연결)", list_a)
+        data = data.drop(["IFRS(연결)"], axis = 1)
+        data.insert(0, "IFRS(연결)", list_a)
+        
+    elif data.columns[0] == "GAAP(개별)":
+        data = data.drop(["GAAP(개별)"], axis = 1)
+        data.insert(0, "GAAP(개별)", list_a)
+        
+    elif data.columns[0] == "GAAP(연결)":
+        data = data.drop(["GAAP(연결)"], axis = 1)
+        data.insert(0, "GAAP(연결)", list_a)
 
     else:
-      data = data.drop(["IFRS(별도)"], axis = 1)
-      data.insert(0, "IFRS(별도)", list_a)
+        data = data.drop(["IFRS(별도)"], axis = 1)
+        data.insert(0, "IFRS(별도)", list_a)
     
     return data
 {% endhighlight %}
