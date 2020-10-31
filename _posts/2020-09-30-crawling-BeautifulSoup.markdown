@@ -105,25 +105,46 @@ data.head()
 {% endhighlight %}
 <img width="719" alt="스크린샷 2020-10-01 오후 1 19 48" src="https://user-images.githubusercontent.com/70478154/94767916-db365880-03e8-11eb-8261-d2de51fcf62e.png">
 
-다음은, index 이름을 깔끔하게 정리했다. 은행, 증권, 카드 등 금융 관련 종목들은 
+다음은, index 이름을 깔끔하게 정리했다. 은행, 증권, 카드 등 금융 관련 종목들은 그 외의 종목들과는 다르게 11개의 재무비율 데이터가 포함되어 있다. 따라서, 데이터의 크기에 따라 index 이름을 다르게 적용했다.
 
 {% highlight ruby %}
 # index name 정리
-list_a = []
+list_finance_1 = ['유동비율', '당좌비율', '부채비율', '유보율', '순차입금비율', '이자보상배율', '자기자본비율', '매출액증가율',
+                  '판매비와관리비증가율', '영업이익증가율', 'EBITDA증가율', 'EPS증가율', '매출총이익율', '세전계속사업이익률',
+                  '영업이익률', 'EBITDA마진율', 'ROA', 'ROE', 'ROIC', '총자산회전율', '총부채회전율', '총자본회전율',
+                  '순운전자본회전율']
+list_finance_2 = ['예대율', '유가증권보유율', '부채비율', '유보율', '순영업손익증가율', '영업이익증가율', '지배주주순이익증가율',
+                  'EPS증가율', '영업이익률', 'ROA', 'ROE']
 
-for j in range(0, len(data)):
-    spl = data.iloc[:,0][j].split("(")
-    list_a.append(spl[0])
+list_a = []
+    
+if len(data) == 23:
+    for i in range(0, len(data)):
+        if (list_finance_1[i] in data.iloc[:,0][i]) == True:
+            list_a.append(list_finance_1[i])
+                
+else:
+    for j in range(0, len(data)):
+        if (list_finance_2[j] in data.iloc[:,0][j]) == True:
+            list_a.append(list_finance_2[j])
     
 # 정리한 index name 적용
 if data.columns[0] == "IFRS(연결)":
-  data = data.drop(["IFRS(연결)"], axis = 1)
-  data.insert(0, "IFRS(연결)", list_a)
+    data = data.drop(["IFRS(연결)"], axis = 1)
+    data.insert(0, "IFRS(연결)", list_a)
+        
+elif data.columns[0] == "GAAP(개별)":
+    data = data.drop(["GAAP(개별)"], axis = 1)
+    data.insert(0, "GAAP(개별)", list_a)
+        
+elif data.columns[0] == "GAAP(연결)":
+    data = data.drop(["GAAP(연결)"], axis = 1)
+    data.insert(0, "GAAP(연결)", list_a)
 
 else:
-  data = data.drop(["IFRS(별도)"], axis = 1)
-  data.insert(0, "IFRS(별도)", list_a)
-  
+    data = data.drop(["IFRS(별도)"], axis = 1)
+    data.insert(0, "IFRS(별도)", list_a)
+
 data.head()
 {% endhighlight %}
 <img width="391" alt="스크린샷 2020-10-01 오후 1 25 45" src="https://user-images.githubusercontent.com/70478154/94768194-aecf0c00-03e9-11eb-8e53-6b2baaf9876e.png">
@@ -165,19 +186,40 @@ def stock_info(stock_code = ""):
     data = data.reset_index(drop = True)
     
     # index name 정리 및 적용
+    list_finance_1 = ['유동비율', '당좌비율', '부채비율', '유보율', '순차입금비율', '이자보상배율', '자기자본비율', '매출액증가율',
+                  '판매비와관리비증가율', '영업이익증가율', 'EBITDA증가율', 'EPS증가율', '매출총이익율', '세전계속사업이익률',
+                  '영업이익률', 'EBITDA마진율', 'ROA', 'ROE', 'ROIC', '총자산회전율', '총부채회전율', '총자본회전율',
+                  '순운전자본회전율']
+    list_finance_2 = ['예대율', '유가증권보유율', '부채비율', '유보율', '순영업손익증가율', '영업이익증가율', '지배주주순이익증가율',
+                  'EPS증가율', '영업이익률', 'ROA', 'ROE']
+
     list_a = []
     
-    for j in range(0, len(data)):
-        spl = data.iloc[:,0][j].split("(")
-        list_a.append(spl[0])
-        
+    if len(data) == 23:
+        for i in range(0, len(data)):
+            if (list_finance_1[i] in data.iloc[:,0][i]) == True:
+                list_a.append(list_finance_1[i])
+                
+    else:
+        for j in range(0, len(data)):
+            if (list_finance_2[j] in data.iloc[:,0][j]) == True:
+                list_a.append(list_finance_2[j])
+
     if data.columns[0] == "IFRS(연결)":
-      data = data.drop(["IFRS(연결)"], axis = 1)
-      data.insert(0, "IFRS(연결)", list_a)
+        data = data.drop(["IFRS(연결)"], axis = 1)
+        data.insert(0, "IFRS(연결)", list_a)
+        
+    elif data.columns[0] == "GAAP(개별)":
+        data = data.drop(["GAAP(개별)"], axis = 1)
+        data.insert(0, "GAAP(개별)", list_a)
+        
+    elif data.columns[0] == "GAAP(연결)":
+        data = data.drop(["GAAP(연결)"], axis = 1)
+        data.insert(0, "GAAP(연결)", list_a)
 
     else:
-      data = data.drop(["IFRS(별도)"], axis = 1)
-      data.insert(0, "IFRS(별도)", list_a)
+        data = data.drop(["IFRS(별도)"], axis = 1)
+        data.insert(0, "IFRS(별도)", list_a)
     
     return data
 {% endhighlight %}
