@@ -438,7 +438,17 @@ print("ROC-AUC score: ", roc_auc_score(y_test_180, RF_pred_proba))
 {% endhighlight %}
 <img width="300" alt="스크린샷 2020-11-02 오후 5 07 22" src="https://user-images.githubusercontent.com/70478154/97844190-ee14b380-1d2d-11eb-8d95-8616a9558301.png">
 
-XGBoost와 RandomForest 모델의 confusion matrix를 
+XGBoost와 RandomForest 모델의 confusion matrix를 비교해보면, RandomForest 모델이 상대적으로 이상적인 예측 구성을 보여줌을 알 수 있으며, ROC-AUC score 역시 소폭 높았다.<BR/><BR/><BR/><BR/>
 
+## 결론
 
+결과를 종합하면, `XGBoost`와 `RandomForest` 모델 모두 비슷한 예측 정확도를 보이며, Overfitting 정도와 ROC-AUC score 역시 큰 차이가 없었다. 다만 RandomForest 모델이 전반적인 모형의 성능 측면에서 매우 미세하게 앞서고 있음을 확인했다.
 
+분석을 진행하면서, XGBoost 모델의 경우 하이퍼 파라미터의 변화에 따라 모형의 성능이 매우 민감하게 반응한다는 것을 체감했다. 따라서, 더 세부적으로 하이퍼 파라미터에 변화를 준다면, 성능의 개선을 기대해 볼 수 있을 것이라 생각한다.<BR/><BR/><BR/><BR/>
+
+## 한계
+
+* 일반화하기에 충분한 양의 데이터가 필요하다.
+* 모델의 성능을 더 높일 수 있는 feature들을 찾아 적용할 필요가 있다.
+* Overfitting 문제에 대한 해결이 필요하다.
+* 두 모델 모두 `class 1`의 precision에 대한 개선이 필요하다.
