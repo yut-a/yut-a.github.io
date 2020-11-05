@@ -237,11 +237,45 @@ print("하락을 예측한 종목 투자 결과: ", down, "%")
 
 결과에 따르면, 상승을 예측한 종목들에 같은 비중으로 투자한 결과 `7.19%`의 수익률을 얻을 수 있음을 알 수 있다. 전 종목에 투자했을 때의 결과인 4.36%, 하락을 예측한 종목들에 투자했을 때의 결과인 1.79%와 비교했을 때 더 좋은 결과를 만들어냈다.
 
+그렇다면, 이 예측 모델에서 결과에 가장 영향을 미치는 feature는 무엇인지 알아보고자 한다.
 
+{% highlight ruby %}
+# Permutation Importances
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
+import eli5
+from eli5.sklearn import PermutationImportance
 
+permuter = PermutationImportance(
+    fi_pipe_3M.named_steps["xgbclassifier"],
+    scoring = "accuracy",
+    n_iter = 10,
+    random_state = 99
+)
 
+X_test_imputed = fi_pipe_3M.named_steps["simpleimputer"].transform(X_test_3M)
+X_test_scaler = fi_pipe_3M.named_steps["minmaxscaler"].transform(X_test_imputed)
 
+permuter.fit(X_test_scaler, y_test_3M);
+
+feature_names = X_test_3M.columns.tolist()
+
+eli5.show_weights(
+    permuter,
+    top = None,
+    feature_names = feature_names
+)
+{% endhighlight %}
+<img width="225" alt="스크린샷 2020-11-06 오전 12 13 30" src="https://user-images.githubusercontent.com/70478154/98259053-f5a1ba00-1fc4-11eb-809e-145b15829ea5.png">
+
+특성 중요도를 확인한 결과, 예측에 가장 많은 영향을 미치는 feature는 `EBITDA증가율` `유보율` `판매비와관리비증가율`임을 알 수 있다. 처음에 살펴본 PER, PBR 역시 중요도 TOP 10 안에 속한다는 것을 알 수 있다.
+
+이 지표들에 대해 간단하게 설명을 하면 다음과 같다.
+
+`EBITDA증가율` : EBITDA는 이자비용, 세금, 감가상각비용 등을 빼기 전 순이익으로, 기업이 영업 활동으로 벌어들인 현금 창출 능력을 나타내는 지표이다.
+`유보율` : 기업이 영업활동을 통해 벌어들인 이익금을 사외로 유출시키지 않고 얼마나 사내에 축적해두고 있는지를 나타내는 지표이다.
+`판매비와관리비증가율` : 판관비(판매비와 관리비)는 기업의 판매와 관리, 유지에서 발생하는 비용을 통틀어 칭하는 용어로 여기에는 급여와 복리후생비, 임차료와 접대비 등이 포함된다.
 
 
 
