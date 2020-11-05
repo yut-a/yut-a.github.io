@@ -29,3 +29,174 @@ tags:   Data Finance
 target은 사업보고서 공시 이후 3개월 뒤의 수익률을 산출하여 `상승`이면 `1`, `하락`이면 `0`으로 설정했다. 일반적으로, 12월 결산 사업보고서는 다음 해 3월 말 혹은 4월 초에 공시가 되기 때문에, 다음 해 4월 10일(공휴일이면 그 다음주 월요일) 가격 대비 3개월 뒤 가격의 수익률을 산출했다.<BR/><BR/><BR/><BR/>
 
 ## 적용 과정
+
+데이터 수집과 전처리는 `다음`과 같은 과정을 거쳤다.
+
+정리하여 저장한 데이터를 불러왔다.
+
+{% highlight ruby %}
+# 데이터 불러오기
+import pandas as pd
+
+all_stock_info_3M = pd.read_csv("/Users/yut_a_/Desktop/all_stock_info_3M.csv")
+all_stock_info_3M
+{% endhighlight %}
+<img width="985" alt="스크린샷 2020-11-05 오후 10 57 01" src="https://user-images.githubusercontent.com/70478154/98249998-44962200-1fba-11eb-97ee-76d0a6973042.png">
+
+배당성향의 결측치을 0으로 채웠다.
+
+{% highlight ruby %}
+# 배당성향 결측치 0으로 채우기
+all_stock_info_3M["배당성향"] = all_stock_info_3M["배당성향"].fillna(0)
+all_stock_info_3M.isnull().sum()
+{% endhighlight %}
+<img width="227" alt="스크린샷 2020-11-05 오후 10 57 45" src="https://user-images.githubusercontent.com/70478154/98250166-78714780-1fba-11eb-9e70-feb46d247049.png">
+
+다음은, 사업보고서 공시 직후 가격 대비 3개월 뒤의 수익률을 산출했다.
+
+{% highlight ruby %}
+# 가격 변화율
+all_stock_info_3M["change(%)"] = round(((all_stock_info_3M["after_3M"] - all_stock_info_3M["price"]) / all_stock_info_3M["price"]) * 100, 2)
+all_stock_info_3M
+{% endhighlight %}
+<img width="993" alt="스크린샷 2020-11-05 오후 11 00 10" src="https://user-images.githubusercontent.com/70478154/98250389-b53d3e80-1fba-11eb-9b25-222c3cfd7700.png">
+
+산출된 수익률을 바탕으로, 상승이면 1, 하락이면 0으로 target을 만들었다. 그 후, train과 test set을 분리했고, 분석을 위해 필요없는 칼럼을 제거했다.
+
+{% highlight ruby %}
+# target 생성
+def rate_3M(x):
+    if x > 0:
+        return 1
+    
+    elif x <= 0:
+        return 0
+    
+all_stock_info_3M["grade"] = all_stock_info_3M["change(%)"].apply(rate_3M)
+{% endhighlight %}
+
+{% highlight ruby %}
+# train, test set 분리
+from sklearn.model_selection import train_test_split
+train_3M_all, test_3M_all = train_test_split(all_stock_info_3M, train_size = 0.8, stratify = all_stock_info_3M["grade"], random_state = 999)
+
+train_3M_all.shape, test_3M_all.shape
+{% endhighlight %}
+<img width="211" alt="스크린샷 2020-11-05 오후 11 02 32" src="https://user-images.githubusercontent.com/70478154/98250642-0a795000-1fbb-11eb-8b3c-e01fddb56018.png">
+
+{% highlight ruby %}
+# 분석을 위해 필요없는 칼럼 제거
+train_3M = train_3M_all.drop(["time", "stock", "code", "price", "after_3M", "change(%)"], axis = 1)
+test_3M = test_3M_all.drop(["time", "stock", "code", "price", "after_3M", "change(%)"], axis = 1)
+test_3M
+{% endhighlight %}
+<img width="980" alt="스크린샷 2020-11-05 오후 11 03 47" src="https://user-images.githubusercontent.com/70478154/98250755-34327700-1fbb-11eb-896f-daab40c0fa07.png">
+
+baseline을 확인한 결과, `0`의 빈도가 가장 높았고, baseline을 `52.67%`로 설정했다.
+
+{% highlight ruby %}
+# baseline
+train_3M["grade"].value_counts(normalize = True)
+{% endhighlight %}
+<img width="246" alt="스크린샷 2020-11-05 오후 11 05 48" src="https://user-images.githubusercontent.com/70478154/98250976-7b206c80-1fbb-11eb-96cf-1d26691c0f80.png">
+
+feature와 target을 분리한 후, 하이퍼 파라미터를 최적화한 `XGBClassifier` 모델을 구축하기 위해 RandomizedSearchCV를 진행했다. 최적 하이퍼 파라미터와 Cross Validation 평균 정확도를 산출한 후, 이를 기반으로 하이퍼 파라미터를 조정하면서 성능을 개선시켰다. 그 후, train set에 재학습시키고 train과 test set의 정확도를 산출했다.
+
+{% highlight ruby %}
+# 하이퍼 파라미터를 최적화한 XGBClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.impute import SimpleImputer
+from xgboost import XGBClassifier
+from sklearn.model_selection import RandomizedSearchCV
+from scipy.stats import randint
+
+pipe_3M = make_pipeline(
+    SimpleImputer(strategy = "mean"),
+    MinMaxScaler(),
+    XGBClassifier(scale_pos_weight = 1.1, random_state = 99)
+)
+
+params = {
+    "xgbclassifier__max_depth" : [5, 10, 15, 20, 25],
+    "xgbclassifier__min_child_weight" : [10, 15, 20, 25, 30],
+    "xgbclassifier__learning_rate" : [0.001, 0.005, 0.01, 0.05],
+    "xgbclassifier__subsample" : [0.3, 0.4, 0.5],
+    "xgbclassifier__n_estimators" : randint(100, 1000),
+    "xgbclassifier__gamma" : [0, 0.25, 0.5, 0.7, 1.0]
+}
+
+clf_3M = RandomizedSearchCV(
+    pipe_3M,
+    params,
+    n_iter = 100,
+    cv = 5,
+    scoring = "f1_weighted",
+    verbose = 1,
+    n_jobs = -1,
+    random_state = 99
+)
+
+clf_3M.fit(X_train_3M, y_train_3M)
+{% endhighlight %}
+
+{% highlight ruby %}
+# 최적 하이퍼 파라미터 / CV score
+print("최적 하이퍼파라미터: ", clf_3M.best_params_, "\n")
+print("CV accuracy score: ", clf_3M.best_score_)
+{% endhighlight %}
+<img width="980" alt="스크린샷 2020-11-05 오후 11 21 37" src="https://user-images.githubusercontent.com/70478154/98252829-b459dc00-1fbd-11eb-9ddd-a4c14392c81a.png">
+
+{% highlight ruby %}
+# 최적 하이퍼 파라미터를 적용한 모델의 train, test set 정확도
+from sklearn.model_selection import cross_val_score
+
+fi_pipe_3M = make_pipeline(
+    SimpleImputer(strategy = "mean"),
+    MinMaxScaler(),
+    XGBClassifier(n_estimators = 488, max_depth = 30, min_child_weight = 20, subsample = 0.3,
+                  learning_rate = 0.003, gamma = 0.7, scale_pos_weight = 1.1, random_state = 99, n_jobs = -1)
+)
+    
+fi_pipe_3M.fit(X_train_3M, y_train_3M)
+
+print("Train set accuracy score: ", fi_pipe_3M.score(X_train_3M, y_train_3M))
+print("CV score: ", cross_val_score(fi_pipe_3M, X_train_3M, y_train_3M, cv = 5).mean())
+print("Test set accuracy score: ", fi_pipe_3M.score(X_test_3M, y_test_3M))
+{% endhighlight %}
+<img width="392" alt="스크린샷 2020-11-05 오후 11 12 10" src="https://user-images.githubusercontent.com/70478154/98251698-61335980-1fbc-11eb-935a-a4c7eecca2c0.png">
+
+결과에 따르면, 약간의 Overfitting 문제가 존재하며, 예측 정확도가 약 `55.65%`로 많이 높지는 않지만, baseline을 상회하는 정확도를 보임을 알 수 있다.
+
+{% highlight ruby %}
+# 3개월 뒤 주가 방향 예측 모델의 confusion matrix
+from sklearn.metrics import plot_confusion_matrix
+import matplotlib.pyplot as plt
+
+flg, ax = plt.subplots()
+pcm = plot_confusion_matrix(fi_pipe_3M, X_test_3M, y_test_3M,
+                           cmap = plt.cm.Blues,
+                           ax = ax);
+
+plt.title(f"Confusion matrix, n = {len(y_test_3M)}", fontsize = 15)
+plt.show()
+{% endhighlight %}
+<img width="319" alt="스크린샷 2020-11-05 오후 11 16 11" src="https://user-images.githubusercontent.com/70478154/98252139-efa7db00-1fbc-11eb-9a4a-4f4b4e0a48c0.png">
+
+{% highlight ruby %}
+# f1-score
+from sklearn.metrics import classification_report
+
+print(classification_report(y_test_3M, fi_pipe_3M.predict(X_test_3M)))
+{% endhighlight %}
+<img width="480" alt="스크린샷 2020-11-05 오후 11 16 31" src="https://user-images.githubusercontent.com/70478154/98252196-fcc4ca00-1fbc-11eb-8d3c-993472f98129.png">
+
+Confusion matrix와 f1-score를 확인한 결과, 한 쪽으로 쏠리지 않고, 각 class가 균일하게 예측이 되었음을 확인할 수 있다. 비록, 예측 정확도가 매우 높지는 않지만, 상승 target의 비중이 약 47.3%이며 이를 상회하는 f1-score를 보이고 있기 때문에 이 모델을 사용하지 않았을 때보다 사용했을 때 더 긍정적인 결과를 기대할 수 있을 것이라 생각했다.
+
+
+
+
+
+
+
+
