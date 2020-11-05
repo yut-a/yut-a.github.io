@@ -9,7 +9,7 @@ tags:   Data Finance
 
 투자를 위한 분석에는 다양한 종류가 있다. 가치투자를 위해 저평가된 주식 종목들을 발굴하는 분석도 있고, 차트의 흐름을 보는 기술적 분석도 있다. 애널리스트처럼 기업 탐방을 통해 비정형화된 정보를, 재무, 회계 지표와 같은 정형화된 정보와 종합하여 투자 판단을 내리기도 한다.
 
-그 외에 `퀀트 투자`라는 것이 있다. 주관적 판단에 의해 비합리적인 선택을 할 수 있기 때문에 감정을 배제한 객관적 투자를 지향한다. 이 때문에 Data(Number) Driven Investment 라고도 한다. 가장 보편적으로 알려진 전략이 `저PER` `저PBR`전략이다. PER(주가수익비율)과 PBR(주가순자산비율)은 각각 `주가/주당순이익`, `주가/주당순자산`으로 산출되는 지표이다. 즉, 저PER, 저PBR이라는 것은 주당순이익, 주당순자산 대비 현재 주가가 낮다는 것으로, 현재 해당 종목이 주식 시장에서 저평가되어 있고, 앞으로 오를 가능성이 높다는 것을 의미하기도 한다. 이러한 퀀트 전략을, Historical Data를 기반으로 백테스팅을 통해 유의미한 성과가 있음을 증명한다.
+그 외에 `퀀트 투자`라는 것이 있다. 주관적 판단에 의해 비합리적인 선택을 할 수 있기 때문에 감정을 배제한 객관적 투자를 지향한다. 이 때문에 Data(Number) Driven Investment 라고도 한다. 가장 보편적으로 알려진 전략이 `저PER` `저PBR`전략이다. PER(주가수익비율)과 PBR(주가순자산비율)은 각각 `주가/주당순이익` `주가/주당순자산`으로 산출되는 지표이다. 즉, 저PER, 저PBR이라는 것은 주당순이익, 주당순자산 대비 현재 주가가 낮다는 것으로, 현재 해당 종목이 주식 시장에서 저평가되어 있고, 앞으로 오를 가능성이 높다는 것을 의미하기도 한다. 이러한 퀀트 전략을, Historical Data를 기반으로 백테스팅을 통해 유의미한 성과가 있음을 증명한다.
 
 그러나, 백테스팅을 통한 증명 및 전략 수정은 과적합으로부터 자유롭지 못하다. 증명 및 수정의 과정에서 모델이 왜곡될 가능성이 크기 때문이다. Out-of-sample을 활용한 검증 과정이 필수적이지만, 이를 활용한 결과가 마찬가지로 좋은 성과를 만들어내기는 쉽지 않다. 
 
@@ -192,6 +192,53 @@ print(classification_report(y_test_3M, fi_pipe_3M.predict(X_test_3M)))
 <img width="480" alt="스크린샷 2020-11-05 오후 11 16 31" src="https://user-images.githubusercontent.com/70478154/98252196-fcc4ca00-1fbc-11eb-8d3c-993472f98129.png">
 
 Confusion matrix와 f1-score를 확인한 결과, 한 쪽으로 쏠리지 않고, 각 class가 균일하게 예측이 되었음을 확인할 수 있다. 비록, 예측 정확도가 매우 높지는 않지만, 상승 target의 비중이 약 47.3%이며 이를 상회하는 f1-score를 보이고 있기 때문에 이 모델을 사용하지 않았을 때보다 사용했을 때 더 긍정적인 결과를 기대할 수 있을 것이라 생각했다.
+
+모델을 통해 `1`로 예측한 데이터들의 종목명과 수익률, 실제 결과를 다음과 같이 정리했다.
+
+{% highlight ruby %}
+# test set의 종목 별 수익률과 예측 및 실제 결과
+result_3M = pd.DataFrame(fi_pipe_3M.predict_proba(X_test_3M))
+result_3M["predict"] = fi_pipe_3M.predict(X_test_3M)
+result_3M["true"] = y_test_3M.tolist()
+result_3M["change(%)"] = test_3M_all["change(%)"].tolist()
+result_3M["stock"] = test_3M_all["stock"].tolist()
+
+result_3M.sort_values(by = [1], ascending = False)[:30]
+{% endhighlight %}
+<img width="428" alt="스크린샷 2020-11-06 오전 12 03 52" src="https://user-images.githubusercontent.com/70478154/98257932-9a22fc80-1fc3-11eb-91a4-86d434f9a554.png">
+
+이를 바탕으로 상승을 예측한 종목들에 투자했을 때의 결과를, 전 종목 혹은 하락을 예측한 종목들에 투자했을 때의 결과와 비교했다.
+
+{% highlight ruby %}
+# 전 종목, 상승 예측, 하락 예측 투자 결과 백테스팅
+import numpy as np
+
+both = float(round(np.mean(result_3M["change(%)"].tolist()), 2))
+up = float(round(np.mean(result_3M[result_3M["predict"] == 1]["change(%)"].tolist()), 2))
+down = float(round(np.mean(result_3M[result_3M["predict"] == 0]["change(%)"].tolist()), 2))
+
+rate_data = [both, up, down]
+label = ["both", "up", "down"]
+
+plt.figure(figsize = (3, 3))
+plt.bar(label, rate_data, width = 0.5, color = ["gray", "red", "blue"], alpha = 0.6)
+
+plt.text(-0.2, 4.5, "4.36%", fontsize = 8)
+plt.text(0.8, 7.35, "7.19%", fontsize = 8)
+plt.text(1.8, 2, "1.79%", fontsize = 8)
+plt.ylim(0, 10)
+plt.show()
+
+print("전 종목 투자 결과: ", both, "%")
+print("상승을 예측한 종목 투자 결과: ", up, "%")
+print("하락을 예측한 종목 투자 결과: ", down, "%")
+{% endhighlight %}
+<img width="423" alt="스크린샷 2020-11-06 오전 12 06 43" src="https://user-images.githubusercontent.com/70478154/98258254-fede5700-1fc3-11eb-95d8-f299ded19753.png">
+
+결과에 따르면, 상승을 예측한 종목들에 같은 비중으로 투자한 결과 `7.19%`의 수익률을 얻을 수 있음을 알 수 있다. 전 종목에 투자했을 때의 결과인 4.36%, 하락을 예측한 종목들에 투자했을 때의 결과인 1.79%와 비교했을 때 더 좋은 결과를 만들어냈다.
+
+
+
 
 
 
