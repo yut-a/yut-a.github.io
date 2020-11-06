@@ -220,12 +220,12 @@ down = float(round(np.mean(result_3M[result_3M["predict"] == 0]["change(%)"].tol
 rate_data = [both, up, down]
 label = ["both", "up", "down"]
 
-plt.figure(figsize = (3, 3))
+plt.figure(figsize = (5, 5))
 plt.bar(label, rate_data, width = 0.5, color = ["gray", "red", "blue"], alpha = 0.6)
 
-plt.text(-0.2, 4.5, "4.36%", fontsize = 8)
-plt.text(0.8, 7.35, "7.19%", fontsize = 8)
-plt.text(1.8, 2, "1.79%", fontsize = 8)
+plt.text(-0.17, 4.5, "4.36%", fontsize = 12)
+plt.text(0.81, 7.35, "7.19%", fontsize = 12)
+plt.text(1.82, 2, "1.79%", fontsize = 12)
 plt.ylim(0, 10)
 plt.show()
 
@@ -233,7 +233,7 @@ print("전 종목 투자 결과: ", both, "%")
 print("상승을 예측한 종목 투자 결과: ", up, "%")
 print("하락을 예측한 종목 투자 결과: ", down, "%")
 {% endhighlight %}
-<img width="423" alt="스크린샷 2020-11-06 오전 12 06 43" src="https://user-images.githubusercontent.com/70478154/98258254-fede5700-1fc3-11eb-95d8-f299ded19753.png">
+<img width="324" alt="스크린샷 2020-11-06 오전 10 28 48" src="https://user-images.githubusercontent.com/70478154/98315179-fc5b1c00-201a-11eb-9c2a-abacf5adbf62.png">
 
 결과에 따르면, 상승을 예측한 종목들에 같은 비중으로 투자한 결과 `7.19%`의 수익률을 얻을 수 있음을 알 수 있다. 전 종목에 투자했을 때의 결과인 4.36%, 하락을 예측한 종목들에 투자했을 때의 결과인 1.79%와 비교했을 때 더 좋은 결과를 만들어냈다.
 
