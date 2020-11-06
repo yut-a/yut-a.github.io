@@ -191,7 +191,23 @@ print(classification_report(y_test_3M, fi_pipe_3M.predict(X_test_3M)))
 {% endhighlight %}
 <img width="480" alt="스크린샷 2020-11-05 오후 11 16 31" src="https://user-images.githubusercontent.com/70478154/98252196-fcc4ca00-1fbc-11eb-8d3c-993472f98129.png">
 
-Confusion matrix와 f1-score를 확인한 결과, 한 쪽으로 쏠리지 않고, 각 class가 균일하게 예측이 되었음을 확인할 수 있다. 비록, 예측 정확도가 매우 높지는 않지만, 상승 target의 비중이 약 47.3%이며 이를 상회하는 f1-score를 보이고 있기 때문에 이 모델을 사용하지 않았을 때보다 사용했을 때 더 긍정적인 결과를 기대할 수 있을 것이라 생각했다.
+Confusion matrix와 f1-score를 확인한 결과, 한 쪽으로 쏠리지 않고, 각 class가 균일하게 예측이 되었음을 확인할 수 있다.
+
+이 외에도 Class 수, 적용 모델, target의 기간을 변화시키며 결과를 확인했다. Class를 2개와 3개로, 모델을 RandomForestClassifier와 XGBClassifier로, target 기간을 3개월 뒤와 6개월 뒤로 변화시켜 적용했다.
+
+**target 기간이 3개월인 경우**
+
+<p float="left">
+<img width="320" alt="스크린샷 2020-11-06 오전 10 54 32" src="https://user-images.githubusercontent.com/70478154/98316835-80fb6980-201e-11eb-8707-bd7115b48e74.png" />
+<img width="315" alt="스크린샷 2020-11-06 오전 10 54 58" src="https://user-images.githubusercontent.com/70478154/98316862-8ce72b80-201e-11eb-9e1f-8328d785521a.png" />
+<img width="328" alt="스크린샷 2020-11-06 오전 10 55 19" src="https://user-images.githubusercontent.com/70478154/98316898-a1c3bf00-201e-11eb-8646-1adac795faac.png" />
+</p>
+
+
+
+
+
+비록, 예측 정확도가 매우 높지는 않지만, 상승 target의 비중이 약 47.3%이며 이를 상회하는 f1-score를 보이고 있기 때문에 이 모델을 사용하지 않았을 때보다 사용했을 때 더 긍정적인 결과를 기대할 수 있을 것이라 생각했다.
 
 모델을 통해 `1`로 예측한 데이터들의 종목명과 수익률, 실제 결과를 다음과 같이 정리했다.
 
