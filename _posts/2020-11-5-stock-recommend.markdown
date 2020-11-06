@@ -195,7 +195,7 @@ Confusion matrix와 f1-score를 확인한 결과, 한 쪽으로 쏠리지 않고
 
 이 외에도 Class 수, 적용 모델, target의 기간을 변화시키며 결과를 확인했다. Class를 2개와 3개로, 모델을 RandomForestClassifier와 XGBClassifier로, target 기간을 3개월 뒤와 6개월 뒤로 변화시켜 적용했다.<BR/><BR/>
 
-**target 기간이 3개월인 경우**
+**2 Class인 경우**
 
 <p float="left">
 <img width="320" alt="스크린샷 2020-11-06 오전 10 54 32" src="https://user-images.githubusercontent.com/70478154/98316835-80fb6980-201e-11eb-8707-bd7115b48e74.png" width="30%"/>
@@ -203,9 +203,9 @@ Confusion matrix와 f1-score를 확인한 결과, 한 쪽으로 쏠리지 않고
 <img width="328" alt="스크린샷 2020-11-06 오전 10 55 19" src="https://user-images.githubusercontent.com/70478154/98316898-a1c3bf00-201e-11eb-8646-1adac795faac.png" width="30%"/>
 </p>
 
-위의 결과에 따르면,
+위의 결과에 따르면, target 기간이 6개월인 경우, baseline에 못 미치는 성능을 보여주었고, RandomForestClassifier 모델인 경우 과적합 문제가 상대적으로 크게 나타났다. target 기간이 3개월이면서 XGBClassifier 모델을 사용한 경우에 가장 높은 성능을 보였다.
 
-**target 기간이 6개월인 경우**
+**3 Class인 경우**
 
 <p float="left">
 <img width="321" alt="스크린샷 2020-11-06 오전 10 57 39" src="https://user-images.githubusercontent.com/70478154/98317004-ee0eff00-201e-11eb-88ce-a7051f4b10aa.png" width="30%"/>
@@ -213,11 +213,11 @@ Confusion matrix와 f1-score를 확인한 결과, 한 쪽으로 쏠리지 않고
 <img width="319" alt="스크린샷 2020-11-06 오전 10 58 26" src="https://user-images.githubusercontent.com/70478154/98317037-097a0a00-201f-11eb-9cc1-20e95d19efba.png" width="30%"/>
 </p>
 
+위의 결과에 따르면, target 기간과 모델에 상관없이 비슷한 성능을 보여주었지만, 상대적으로 target 기간이 6개월이면서 XGBClassifier 모델을 사용한 경우에 가장 높은 성능을 보여주었다.
 
+두 결과를 종합해보았을 때, 3 Class인 경우 역시 baseline을 상회하는 성능을 보여주고 있지만, 낮은 예측도를 보이고 있기 때문에 활용하기에는 무리가 있다. 따라서, 2 Class의 target 기간이 3개월인 데이터에 XGBClassifier를 적용한 모델이 가장 적합하다고 판단했다.<BR/><BR/>
 
-
-
-비록, 예측 정확도가 매우 높지는 않지만, 상승 target의 비중이 약 47.3%이며 이를 상회하는 f1-score를 보이고 있기 때문에 이 모델을 사용하지 않았을 때보다 사용했을 때 더 긍정적인 결과를 기대할 수 있을 것이라 생각했다.
+비록 선택한 모델의 예측 정확도가 매우 높지는 않지만, 상승 target의 비중이 약 47.3%이며 이를 상회하는 f1-score를 보이고 있기 때문에 이 모델을 사용하지 않았을 때보다 사용했을 때 더 긍정적인 결과를 기대할 수 있을 것이라 생각했다.
 
 모델을 통해 `1`로 예측한 데이터들의 종목명과 수익률, 실제 결과를 다음과 같이 정리했다.
 
