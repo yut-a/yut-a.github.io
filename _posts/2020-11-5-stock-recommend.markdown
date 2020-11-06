@@ -193,14 +193,24 @@ print(classification_report(y_test_3M, fi_pipe_3M.predict(X_test_3M)))
 
 Confusion matrix와 f1-score를 확인한 결과, 한 쪽으로 쏠리지 않고, 각 class가 균일하게 예측이 되었음을 확인할 수 있다.
 
-이 외에도 Class 수, 적용 모델, target의 기간을 변화시키며 결과를 확인했다. Class를 2개와 3개로, 모델을 RandomForestClassifier와 XGBClassifier로, target 기간을 3개월 뒤와 6개월 뒤로 변화시켜 적용했다.
+이 외에도 Class 수, 적용 모델, target의 기간을 변화시키며 결과를 확인했다. Class를 2개와 3개로, 모델을 RandomForestClassifier와 XGBClassifier로, target 기간을 3개월 뒤와 6개월 뒤로 변화시켜 적용했다.<BR/><BR/>
 
 **target 기간이 3개월인 경우**
 
 <p float="left">
 <img width="320" alt="스크린샷 2020-11-06 오전 10 54 32" src="https://user-images.githubusercontent.com/70478154/98316835-80fb6980-201e-11eb-8707-bd7115b48e74.png" width="30%"/>
-<img width="315" alt="스크린샷 2020-11-06 오전 10 54 58" src="https://user-images.githubusercontent.com/70478154/98316862-8ce72b80-201e-11eb-9e1f-8328d785521a.png" width="30%"/>
+<img width="319" alt="스크린샷 2020-11-06 오전 11 05 49" src="https://user-images.githubusercontent.com/70478154/98317565-14816a00-2020-11eb-8b89-6115a936c4f6.png" width="30%"/>
 <img width="328" alt="스크린샷 2020-11-06 오전 10 55 19" src="https://user-images.githubusercontent.com/70478154/98316898-a1c3bf00-201e-11eb-8646-1adac795faac.png" width="30%"/>
+</p>
+
+위의 결과에 따르면,
+
+**target 기간이 6개월인 경우**
+
+<p float="left">
+<img width="321" alt="스크린샷 2020-11-06 오전 10 57 39" src="https://user-images.githubusercontent.com/70478154/98317004-ee0eff00-201e-11eb-88ce-a7051f4b10aa.png" width="30%"/>
+<img width="320" alt="스크린샷 2020-11-06 오전 10 58 00" src="https://user-images.githubusercontent.com/70478154/98317023-fc5d1b00-201e-11eb-9e1c-b449aef57a31.png" width="30%"/>
+<img width="319" alt="스크린샷 2020-11-06 오전 10 58 26" src="https://user-images.githubusercontent.com/70478154/98317037-097a0a00-201f-11eb-9cc1-20e95d19efba.png" width="30%"/>
 </p>
 
 
