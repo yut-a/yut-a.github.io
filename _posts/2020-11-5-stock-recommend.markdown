@@ -309,9 +309,11 @@ eli5.show_weights(
 
 {% highlight ruby %}
 # PDP - EBITDA증가율
-plt.rcParams['figure.dpi'] = 144
-
+import matplotlib as mpl
 from pdpbox.pdp import pdp_isolate, pdp_plot
+
+plt.rcParams['figure.dpi'] = 144
+mpl.rc('axes', unicode_minus = False)
 
 X_test_df = pd.DataFrame(X_test_scaler, columns = X_test_3M.columns.tolist())
 
@@ -321,20 +323,22 @@ isolated = pdp_isolate(
     model = fi_pipe_3M.named_steps["xgbclassifier"],
     dataset = X_test_df,
     model_features = X_test_df.columns,
-    feature = feature_1,
+    feature = feature_1
 )
 
-pdp_plot(isolated, feature_name = feature_1);
+pdp_plot(isolated, feature_name = feature_1, plot_params = {'font_family' : 'AppleGothic'});
 {% endhighlight %}
-<img width="984" alt="스크린샷 2020-11-06 오전 12 48 18" src="https://user-images.githubusercontent.com/70478154/98263142-cd688a00-1fc9-11eb-8254-fe66477ef9f2.png">
+<img width="994" alt="스크린샷 2020-11-06 오후 5 17 01" src="https://user-images.githubusercontent.com/70478154/98342849-54624480-2054-11eb-9726-80dde6705814.png">
 
 두 번째로, `유보율`은 **극초반에 target과 양의 상관관계를 보이다가 대체로 음의 상관관계**를 가진다는 것을 확인할 수 있다. 유보율이 높으면 예상치 못한 위기 상황에 대응할 수 있는 현금이 있기 때문에 안정적인 재무 구조를 유지할 수 있지만, 유보율이 과도하게 높아진다면 기업이 마땅한 투자처를 찾지 못해 수익을 창출하지 못하고 현금만 쌓아두는 것일 수 있다. 따라서 이러한 유보율의 특징이 반영되었음을 예상해 볼 수 있다.
 
 {% highlight ruby %}
 # PDP - 유보율
-plt.rcParams['figure.dpi'] = 144
-
+import matplotlib as mpl
 from pdpbox.pdp import pdp_isolate, pdp_plot
+
+plt.rcParams['figure.dpi'] = 144
+mpl.rc('axes', unicode_minus = False)
 
 X_test_df = pd.DataFrame(X_test_scaler, columns = X_test_3M.columns.tolist())
 
@@ -347,17 +351,19 @@ isolated = pdp_isolate(
     feature = feature_2,
 )
 
-pdp_plot(isolated, feature_name = feature_2);
+pdp_plot(isolated, feature_name = feature_2, plot_params = {'font_family' : 'AppleGothic'});
 {% endhighlight %}
-<img width="993" alt="스크린샷 2020-11-06 오전 12 49 12" src="https://user-images.githubusercontent.com/70478154/98263243-f0933980-1fc9-11eb-967c-093039b2af26.png">
+<img width="982" alt="스크린샷 2020-11-06 오후 5 17 17" src="https://user-images.githubusercontent.com/70478154/98342913-6e038c00-2054-11eb-8aa3-e1b2fff1fa01.png">
 
 세 번째로, `판매비와관리비증가율`은 전반적으로 **상승으로의 예측에 양의 영향을 주고 있지만, 판매비와관리비증가율이 커질수록 그 영향의 크기는 조금씩 떨어짐**을 알 수 있다. 판관비는 비용이기 때문에 일반적으로, 기업 이익에 긍정적인 영향을 줄 수만은 없다. 그러나 판관비에 속하는 비용에는 광고비, 복리후생비, 교육훈련비 등을 포함하고 있기 때문에 추후 기업의 이익으로 되돌아올 수 있는 비용이라고 할 수 있다. 이러한 점 때문에 전반적으로 `상승`으로의 예측에 긍정적인 영향을 주고 있지만, 이 비용이 과도할 경우 오히려 기업 이익에 부정적 효과를 야기할 수 있다고 해석할 수 있다.
 
 {% highlight ruby %}
 # PDP - 판매비와관리비증가율
-plt.rcParams['figure.dpi'] = 144
-
+import matplotlib as mpl
 from pdpbox.pdp import pdp_isolate, pdp_plot
+
+plt.rcParams['figure.dpi'] = 144
+mpl.rc('axes', unicode_minus = False)
 
 X_test_df = pd.DataFrame(X_test_scaler, columns = X_test_3M.columns.tolist())
 
@@ -370,9 +376,9 @@ isolated = pdp_isolate(
     feature = feature_3,
 )
 
-pdp_plot(isolated, feature_name = feature_3);
+pdp_plot(isolated, feature_name = feature_3, plot_params = {'font_family' : 'AppleGothic'});
 {% endhighlight %}
-<img width="987" alt="스크린샷 2020-11-06 오전 12 56 21" src="https://user-images.githubusercontent.com/70478154/98264122-ed4c7d80-1fca-11eb-9c1e-998046701b20.png">
+<img width="993" alt="스크린샷 2020-11-06 오후 5 17 36" src="https://user-images.githubusercontent.com/70478154/98342992-84a9e300-2054-11eb-8478-e546857d7440.png">
 
 네 번째로, `PBR`은 대체로 target과 **음의 상관관계**를 보임을 알 수 있다. 즉, PBR이 높을수록 `상승`으로 예측할 가능성이 낮아진다는 의미이다. 이를 통해, 처음에 언급했던 것처럼 주당순자산 대비 주가가 저평가되어 있는 종목들의 상승 기대가 높은 저PBR 전략이 이 모델에서 작동하고 있다고 해석할 수 있다.
 
