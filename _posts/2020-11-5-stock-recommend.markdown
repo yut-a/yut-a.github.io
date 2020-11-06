@@ -198,9 +198,9 @@ Confusion matrix와 f1-score를 확인한 결과, 한 쪽으로 쏠리지 않고
 **target 기간이 3개월인 경우**
 
 <p float="left">
-<img width="320" alt="스크린샷 2020-11-06 오전 10 54 32" src="https://user-images.githubusercontent.com/70478154/98316835-80fb6980-201e-11eb-8707-bd7115b48e74.png" width="33%"/>
-<img width="315" alt="스크린샷 2020-11-06 오전 10 54 58" src="https://user-images.githubusercontent.com/70478154/98316862-8ce72b80-201e-11eb-9e1f-8328d785521a.png" width="33%"/>
-<img width="328" alt="스크린샷 2020-11-06 오전 10 55 19" src="https://user-images.githubusercontent.com/70478154/98316898-a1c3bf00-201e-11eb-8646-1adac795faac.png" width="33%"/>
+<img width="320" alt="스크린샷 2020-11-06 오전 10 54 32" src="https://user-images.githubusercontent.com/70478154/98316835-80fb6980-201e-11eb-8707-bd7115b48e74.png" width="30%"/>
+<img width="315" alt="스크린샷 2020-11-06 오전 10 54 58" src="https://user-images.githubusercontent.com/70478154/98316862-8ce72b80-201e-11eb-9e1f-8328d785521a.png" width="30%"/>
+<img width="328" alt="스크린샷 2020-11-06 오전 10 55 19" src="https://user-images.githubusercontent.com/70478154/98316898-a1c3bf00-201e-11eb-8646-1adac795faac.png" width="30%"/>
 </p>
 
 
