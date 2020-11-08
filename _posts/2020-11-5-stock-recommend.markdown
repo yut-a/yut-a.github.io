@@ -582,7 +582,7 @@ finance_all.to_csv("finance_all.csv", header = True, index = False)
 </details>
 <BR/>
 <details>
-<summary>데이터 전처리</summary>
+<summary><I><B><BIG>데이터 전처리</BIG></B></I></summary>
 <div markdown="1">
 <BR/><BR/>
 수집한 재무비율, 투자지표 데이터들을 불러와 병합했다.
