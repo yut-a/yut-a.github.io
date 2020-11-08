@@ -33,7 +33,7 @@ target은 사업보고서 공시 이후 3개월 뒤의 수익률을 산출하여
 <details>
 <summary>데이터 수집</summary>
 <div markdown="1">
-    
+<BR/><BR/>
 #### 투자지표
 
 먼저, PER, PBR과 같은 종목 별 투자 지표를 추출할 수 있는 함수를 만들었다.
@@ -595,14 +595,14 @@ finance_all.to_csv("finance_all.csv", header = True, index = False)
 
 
 
-
+<BR/><BR/>
 정리하여 저장한 데이터를 불러왔다.
 
 {% highlight ruby %}
 # 데이터 불러오기
 import pandas as pd
 
-all_stock_info_3M = pd.read_csv("/Users/yut_a_/Desktop/all_stock_info_3M.csv")
+all_stock_info_3M = pd.read_csv("all_stock_info_3M.csv")
 all_stock_info_3M
 {% endhighlight %}
 <img width="985" alt="스크린샷 2020-11-05 오후 10 57 01" src="https://user-images.githubusercontent.com/70478154/98249998-44962200-1fba-11eb-97ee-76d0a6973042.png">
