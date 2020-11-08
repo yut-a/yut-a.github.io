@@ -31,10 +31,566 @@ target은 사업보고서 공시 이후 3개월 뒤의 수익률을 산출하여
 ## 적용 과정
 
 <details>
-<summary>데이터 수집 및 전처리</summary>
+<summary>데이터 수집</summary>
+    
+#### 투자지표
+
+먼저, PER, PBR과 같은 종목 별 투자 지표를 추출할 수 있는 함수를 만들었다.
+
+{% highlight ruby %}
+# 투자 지표 데이터 추출 함수
+def invest_info(stock_code = ""):
+    from urllib.request import urlopen
+    from html_table_parser import parser_functions as parser
+    import pandas as pd
+    import bs4
+    import numpy as np
+    
+    # url 소스코드 긁어와 table 태그 데이터를 list 형식으로 변환
+    url = "http://comp.fnguide.com/SVO2/ASP/SVD_Invest.asp?pGB=1&gicode=" + stock_code + "&cID=&MenuYn=Y&ReportGB=&NewMenuID=103&stkGb=701"
+    source = urlopen(url).read()
+    source = bs4.BeautifulSoup(source, "lxml")
+    table = source.find_all("table")[1]
+    p = parser.make2d(table)
+    
+    # DataFrame 변환 / 필요없는 행 제거
+    df = pd.DataFrame(p, columns = p[0])
+    
+    if len(df) == 52:
+        num = df.index[df.iloc[:,0].isin(["Per\xa0Share", "Dividends", "Multiples", "FCF"])]
+        df = df.drop(num, axis = 0)
+        df = df.drop(0, axis = 0)
+        df = df.reset_index(drop = True)
+    
+    else:
+        num = df.index[df.iloc[:,0].isin(["Per\xa0Share", "Dividends", "Multiples"])]
+        df = df.drop(num, axis = 0)
+        df = df.drop(0, axis = 0)
+        df = df.reset_index(drop = True)
+    
+    # 투자 지표 비율 데이터만 추출
+    data = df.iloc[0:1]
+
+    if (len(df) % 3) == 0:
+        for i in range(2, int(len(df) / 3) + 1):
+            a = 3*i - 3
+            b = a + 1
+            data = pd.concat([data, df.iloc[a:b]])
+        
+    else:
+        for i in range(2, (int((len(df) - 2) / 3) + 1)):
+            a = 3*i - 3
+            b = a + 1
+            data = pd.concat([data, df.iloc[a:b]])
+        data = pd.concat([data, df.iloc[(len(df) - 2):len(df)]])
+    
+    data = data.reset_index(drop = True)
+    
+    # index name 정리 및 적용
+    list_index_1 = ["EPS", "EBITDAPS", "CFPS", "SPS", "BPS", "DPS(보통주,현금)", "DPS(1우선주,현금)", "배당성향",
+                    "PER", "PCR", "PSR", "PBR", "EV/Sales", "EV/EBITDA", "총현금흐름", "총투자", "FCFF"]
+    list_index_2 = ["EPS", "BPS", "DPS(보통주,현금)", "DPS(1우선주,현금)", "배당성향(현금,%)", "PER", "PBR"]
+    list_spl = []
+
+    if len(data) == 17:                 
+        for i in range(0, len(data)):
+            if (list_index_1[i] in data.iloc[:,0][i]) == True:
+                list_spl.append(list_index_1[i])
+
+    else:
+        for j in range(0, len(data)):
+            if (list_index_2[j] in data.iloc[:,0][j]) == True:
+                list_spl.append(list_index_2[j])
+                
+    if data.columns[0] == "IFRS 연결":
+        data = data.drop(["IFRS 연결"], axis = 1)
+        data.insert(0, "IFRS(연결)", list_spl)
+    
+    elif data.columns[0] == "GAAP 개별":
+        data = data.drop(["GAAP 개별"], axis = 1)
+        data.insert(0, "GAAP(개별)", list_spl)
+        
+    elif data.columns[0] == "GAAP 연결":
+        data = data.drop(["GAAP 연결"], axis = 1)
+        data.insert(0, "GAAP(연결)", list_spl)
+
+    else:
+        data = data.drop(["IFRS 개별"], axis = 1)
+        data.insert(0, "IFRS(별도)", list_spl)
+        
+    return data
+{% endhighlight %}
+
+다음은, 사용할 코스피, 코스닥 종목들을 필터링하기 위해 각 시장에 상장되어 있는 종목들의 코드와 종목명 데이터를 불러왔다. 코스피 종목들부터 진행했다.
+
+{% highlight ruby %}
+# 코스피 종목 코드 데이터
+import pandas as pd
+
+kospi_stock = pd.read_csv("kospi_stock.csv")
+kospi_stock.rename(columns = {"null" : "code", "null.1" : "stock"}, inplace = True)
+kospi_stock = kospi_stock.drop(kospi_stock.columns[2:], axis = 1)
+kospi_stock
+{% endhighlight %}
+<img width="171" alt="스크린샷 2020-11-08 오후 5 13 27" src="https://user-images.githubusercontent.com/70478154/98460233-c6b65e80-21e5-11eb-8e80-e628d4a44fc9.png">
+
+코스피 종목들 중 펀드 형태의 종목, 관리종목, 거래정지종목들을 제거했다. 또한, 코드를 `A000000` 형태로 변환했다.
+
+{% highlight ruby %}
+# 펀드 종목 제외 (메리츠는 금융 관련 주라 미리 제외)
+cond_fund = kospi_stock["stock"].str.contains("리츠") | kospi_stock["stock"].str.contains("하이골드") | kospi_stock["stock"].str.contains("바다로")
+kospi_stock = kospi_stock.drop(kospi_stock[cond_fund].index, axis = 0)
+
+# 코스피 관리종목 리스트
+kospi_admin = pd.read_csv("kospi_admin.csv")
+kospi_admin = kospi_admin["종목명"].tolist()
+kospi_admin = pd.DataFrame(kospi_admin)
+
+# 코스피 거래정지종목 리스트
+kospi_stop = pd.read_csv("kospi_stop.csv")
+kospi_stop = kospi_stop["종목명"].tolist()
+kospi_stop = pd.DataFrame(kospi_stop)
+
+# 관리종목 / 거래정지종목 중복값 처리
+kospi_admin_stop = pd.concat([kospi_admin, kospi_stop])
+kospi_admin_stop = kospi_admin_stop.drop_duplicates([0], keep = "first")
+kospi_admin_stop = kospi_admin_stop[0].tolist()
+
+# 관리종목 / 거래정지종목 중 상장폐지 예정 종목 필터링
+kospi_del_stocks = []
+
+for i in range(0, len(kospi_admin_stop)):
+    if (kospi_admin_stop[i] in list(kospi_stock["stock"])) == False:
+        kospi_del_stock = kospi_admin_stop[i]
+        kospi_del_stocks.append(kospi_del_stock)
+
+for i in kospi_del_stocks:
+    kospi_admin_stop.remove(i)
+
+# 관리종목 / 거래정지종목 제거  
+num_kospi = []
+
+for i in kospi_admin_stop:
+    index_num_kospi = kospi_stock[kospi_stock["stock"] == i].index[0]
+    num_kospi.append(index_num_kospi)
+    
+kospi_stock = kospi_stock.drop(num_kospi, axis = 0).reset_index(drop = True)
+
+# A000000 형태로 종목코드 변경
+kospi_stock = kospi_stock.astype({"code" : str})
+code_list = kospi_stock["code"].tolist()
+
+code_change = []
+
+for i in range(0, len(code_list)):
+    if len(code_list[i]) == 6:
+        code_data = "A" + code_list[i]
+    
+    elif len(code_list[i]) == 5:
+        code_data = "A0" + code_list[i]
+        
+    elif len(code_list[i]) == 4:
+        code_data = "A00" + code_list[i]
+        
+    elif len(code_list[i]) == 3:
+        code_data = "A000" + code_list[i]
+    
+    elif len(code_list[i]) == 2:
+        code_data = "A0000" + code_list[i]
+        
+    elif len(code_list[i]) == 1:
+        code_data = "A00000" + code_list[i]
+        
+    code_change.append(code_data)
+    
+kospi_stock = kospi_stock.drop(["code"], axis = 1)
+kospi_stock.insert(0, "code", code_change)
+kospi_stock
+{% endhighlight %}
+<img width="179" alt="스크린샷 2020-11-08 오후 5 17 51" src="https://user-images.githubusercontent.com/70478154/98460281-6247cf00-21e6-11eb-972b-8a9aef30e3b6.png">
+
+그 후, 금융 관련 종목들의 리스트를 추출하고, 이 종목들 역시 제외했다.
+
+{% highlight ruby %}
+# 금융 관련 종목 제외 리스트
+list_for_drop = kospi_stock["code"].tolist()
+drop_list = []
+
+for i in list_for_drop:
+    stock = invest_info(i)
+    if len(stock) != 17:
+        fi_stock = i
+        drop_list.append(fi_stock)
+        
+# 금융 관련 종목 제외
+fi_num = []
+
+for i in drop_list:
+    index_fi_num = kospi_stock[kospi_stock["code"] == i].index[0]
+    fi_num.append(index_fi_num)
+
+kospi_stock = kospi_stock.drop(fi_num, axis = 0).reset_index(drop = True)
+kospi_stock
+{% endhighlight %}
+<img width="168" alt="스크린샷 2020-11-08 오후 5 19 46" src="https://user-images.githubusercontent.com/70478154/98460302-a509a700-21e6-11eb-95c6-b840aff9258f.png">
+
+사용할 코스피 종목들 추출을 완료한 후, 이 데이터를 바탕으로 위에서 만든 투자지표 추출 함수에 코드를 입력하여 코스피 종목 별 투자 지표 데이터를 추출하고, 데이터들을 병합했다. 또한, 칼럼명을 다듬고, 데이터별 종목명 칼럼을 추가했다.
+
+{% highlight ruby %}
+# kospi 종목별 투자 지표
+list_index_1 = ["EPS", "EBITDAPS", "CFPS", "SPS", "BPS", "DPS(보통주,현금)", "DPS(1우선주,현금)", "배당성향",
+                    "PER", "PCR", "PSR", "PBR", "EV/Sales", "EV/EBITDA", "총현금흐름", "총투자", "FCFF", "code"]
+kospi_invest = pd.DataFrame(columns = list_index_1)
+
+all_kospi_code = kospi_stock["code"].tolist()
+
+for i in all_kospi_code:
+    stock_invest = invest_info(i).iloc[:,1:5].T
+    stock_invest.columns = invest_info(i).iloc[:,0].tolist()
+    stock_invest["code"] = i
+    
+    kospi_invest = pd.concat([kospi_invest, stock_invest])
+    
+kospi_invest = kospi_invest.reset_index()
+
+# 코드별 종목 병합
+kospi_invest = kospi_invest.rename(columns = {"index" : "time"})
+kospi_invest_all = pd.merge(kospi_invest, kospi_stock, on = "code", how = "outer")
+kospi_invest_all
+{% endhighlight %}
+<img width="788" alt="스크린샷 2020-11-08 오후 5 24 32" src="https://user-images.githubusercontent.com/70478154/98460381-527cba80-21e7-11eb-9442-96d6cdc262ca.png">
+
+위와 같은 방식으로, 사용할 코스닥 종목들을 필터링한 후, 코스닥 종목 별 투자지표들 역시 추출하고 병합했다.
+
+{% highlight ruby %}
+# 코스닥 종목 데이터
+kosdaq_stock = pd.read_csv("kosdaq_stock.csv")
+kosdaq_stock.rename(columns = {"null" : "code", "null.1" : "stock"}, inplace = True)
+kosdaq_stock = kosdaq_stock.drop(kosdaq_stock.columns[2:], axis = 1)
+
+# 코스닥 관리종목 리스트
+kosdaq_admin = pd.read_csv("kosdaq_admin.csv")
+kosdaq_admin = kosdaq_admin["종목명"].tolist()
+kosdaq_admin = pd.DataFrame(kosdaq_admin)
+
+# 코스닥 거래정지종목 리스트
+kosdaq_stop = pd.read_csv("kosdaq_stop.csv")
+kosdaq_stop = kosdaq_stop["종목명"].tolist()
+kosdaq_stop = pd.DataFrame(kosdaq_stop)
+
+# 관리종목 / 거래정지종목 중복값 처리
+kosdaq_admin_stop = pd.concat([kosdaq_admin, kosdaq_stop])
+kosdaq_admin_stop = kosdaq_admin_stop.drop_duplicates([0], keep = "first")
+kosdaq_admin_stop = kosdaq_admin_stop[0].tolist()
+
+# 관리종목 / 거래정지종목 중 상장폐지 예정 종목 필터링
+kosdaq_del_stocks = []
+
+for i in range(0, len(kosdaq_admin_stop)):
+    if (kosdaq_admin_stop[i] in list(kosdaq_stock["stock"])) == False:
+        kosdaq_del_stock = kosdaq_admin_stop[i]
+        kosdaq_del_stocks.append(kosdaq_del_stock)
+
+for i in kosdaq_del_stocks:
+    kosdaq_admin_stop.remove(i)
+
+# 관리종목 / 거래정지종목 제거  
+num_kosdaq = []
+
+for i in kosdaq_admin_stop:
+    index_num_kosdaq = kosdaq_stock[kosdaq_stock["stock"] == i].index[0]
+    num_kosdaq.append(index_num_kosdaq)
+    
+kosdaq_stock = kosdaq_stock.drop(num_kosdaq, axis = 0).reset_index(drop = True)
+
+# SPAC 종목 제외
+cond_spac = kosdaq_stock["stock"].str.contains("스팩")
+kosdaq_stock = kosdaq_stock.drop(kosdaq_stock[cond_spac].index, axis = 0).reset_index(drop = True)
+
+# A000000 형태로 종목코드 변경
+kosdaq_stock = kosdaq_stock.astype({"code" : str})
+kosdaq_code_list = kosdaq_stock["code"].tolist()
+
+kosdaq_code_change = []
+
+for i in range(0, len(kosdaq_code_list)):
+    if len(kosdaq_code_list[i]) == 6:
+        kosdaq_code_data = "A" + kosdaq_code_list[i]
+    
+    elif len(kosdaq_code_list[i]) == 5:
+        kosdaq_code_data = "A0" + kosdaq_code_list[i]
+        
+    elif len(kosdaq_code_list[i]) == 4:
+        kosdaq_code_data = "A00" + kosdaq_code_list[i]
+        
+    elif len(kosdaq_code_list[i]) == 3:
+        kosdaq_code_data = "A000" + kosdaq_code_list[i]
+    
+    elif len(kosdaq_code_list[i]) == 2:
+        kosdaq_code_data = "A0000" + kosdaq_code_list[i]
+        
+    elif len(kosdaq_code_list[i]) == 1:
+        kosdaq_code_data = "A00000" + kosdaq_code_list[i]
+        
+    kosdaq_code_change.append(kosdaq_code_data)
+    
+kosdaq_stock = kosdaq_stock.drop(["code"], axis = 1)
+kosdaq_stock.insert(0, "code", kosdaq_code_change)
+kosdaq_stock
+{% endhighlight %}
+<img width="182" alt="스크린샷 2020-11-08 오후 5 30 15" src="https://user-images.githubusercontent.com/70478154/98460477-1eee6000-21e8-11eb-9eac-c322cfc8f120.png">
+
+한번에 너무 많은 양을 연속 추출하게 되면 오류가 발생하기 때문에 반으로 나눠 금융 관련 종목 리스트를 추출하고 제거했다. 또한, 코스닥 종목 별 투자지표들도 추출했다.
+
+{% highlight ruby %}
+# 반으로 분할 (오류 방지)
+kosdaq_stock_1 = kosdaq_stock[:635]
+kosdaq_stock_2 = kosdaq_stock[635:]
+
+# 금융 관련 종목 제외 리스트_1
+kosdaq_list_for_drop_1 = kosdaq_stock_1["code"].tolist()
+kosdaq_drop_list_1 = []
+
+for i in kosdaq_list_for_drop_1:
+    stock = invest_info(i)
+    if len(stock) != 17:
+        fi_stock = i
+        kosdaq_drop_list_1.append(fi_stock)
+        
+# 금융 관련 종목 제외 리스트_2
+kosdaq_list_for_drop_2 = kosdaq_stock_2["code"].tolist()
+kosdaq_drop_list_2 = []
+
+for i in kosdaq_list_for_drop_2:
+    stock = invest_info(i)
+    if len(stock) != 17:
+        fi_stock = i
+        kosdaq_drop_list_2.append(fi_stock)
+    
+# 금융 관련 종목 제외_1
+fi_num_kosdaq_1 = []
+
+for i in kosdaq_drop_list_1:
+    index_fi_num_kosdaq_1 = kosdaq_stock[kosdaq_stock["code"] == i].index[0]
+    fi_num_kosdaq_1.append(index_fi_num_kosdaq_1)
+
+kosdaq_stock = kosdaq_stock.drop(fi_num_kosdaq_1, axis = 0).reset_index(drop = True)
+
+# 금융 관련 종목 제외_2
+fi_num_kosdaq_2 = []
+
+for i in kosdaq_drop_list_2:
+    index_fi_num_kosdaq_2 = kosdaq_stock[kosdaq_stock["code"] == i].index[0]
+    fi_num_kosdaq_2.append(index_fi_num_kosdaq_2)
+
+kosdaq_stock = kosdaq_stock.drop(fi_num_kosdaq_2, axis = 0).reset_index(drop = True)
+{% endhighlight %}
+
+{% highlight ruby %}
+# 반으로 분할 (오류 방지)
+kosdaq_stock_1 = kosdaq_stock[:624]
+kosdaq_stock_2 = kosdaq_stock[624:]
+
+# kosdaq 종목별 투자 지표_1
+list_index_1 = ["EPS", "EBITDAPS", "CFPS", "SPS", "BPS", "DPS(보통주,현금)", "DPS(1우선주,현금)", "배당성향",
+                    "PER", "PCR", "PSR", "PBR", "EV/Sales", "EV/EBITDA", "총현금흐름", "총투자", "FCFF", "code"]
+kosdaq_invest = pd.DataFrame(columns = list_index_1)
+
+all_kosdaq_code_1 = kosdaq_stock_1["code"].tolist()
+
+for i in all_kosdaq_code_1:
+    kosdaq_stock_invest = invest_info(i).iloc[:,1:5].T
+    kosdaq_stock_invest.columns = invest_info(i).iloc[:,0].tolist()
+    kosdaq_stock_invest["code"] = i
+    
+    kosdaq_invest = pd.concat([kosdaq_invest, kosdaq_stock_invest])
+    
+# kosdaq 종목별 투자 지표_2
+all_kosdaq_code_2 = kosdaq_stock_2["code"].tolist()
+
+for i in all_kosdaq_code_2:
+    kosdaq_stock_invest = invest_info(i).iloc[:,1:5].T
+    kosdaq_stock_invest.columns = invest_info(i).iloc[:,0].tolist()
+    kosdaq_stock_invest["code"] = i
+    
+    kosdaq_invest = pd.concat([kosdaq_invest, kosdaq_stock_invest])
+    
+kosdaq_invest = kosdaq_invest.reset_index()
+
+# 코드별 종목 병합
+kosdaq_invest = kosdaq_invest.rename(columns = {"index" : "time"})
+kosdaq_invest_all = pd.merge(kosdaq_invest, kosdaq_stock, on = "code", how = "outer")
+kosdaq_invest_all
+{% endhighlight %}
+<img width="781" alt="스크린샷 2020-11-08 오후 5 34 56" src="https://user-images.githubusercontent.com/70478154/98460546-c5d2fc00-21e8-11eb-8610-74aab94b7e1d.png">
+
+추출한 코스피, 코스닥의 종목 별 투자지표들을 병합하고 저장했다.
+
+{% highlight ruby %}
+# 코스피, 코스닥 투자 지표 병합
+invest_all = pd.concat([kospi_invest_all, kosdaq_invest_all])
+invest_all
+{% endhighlight %}
+<img width="785" alt="스크린샷 2020-11-08 오후 5 36 28" src="https://user-images.githubusercontent.com/70478154/98460577-fb77e500-21e8-11eb-99a2-85444b00eace.png">
+
+{% highlight ruby %}
+# 투자 지표 데이터 저장
+invest_all.to_csv("invest_all.csv", header = True, index = False)
+{% endhighlight %}<BR/><BR/>
+
+#### 재무비율
+
+이번에는 코스피, 코스닥 종목 별 재무비율 데이터를 추출했다. 위에서 필터링한, 사용할 코스피, 코스닥 종목 리스트를 활용하여 재무비율 추출 함수와 함께 코스피, 코스닥 종목 별 재무비율 데이터를 추출하고 병합했다. 모든 과정과 방식은 위와 동일하다.
+
+{% highlight ruby %}
+# 재무 비율 데이터 추출 함수
+def stock_info(stock_code = ""):
+    
+    from urllib.request import urlopen
+    from html_table_parser import parser_functions as parser
+    import pandas as pd
+    import bs4
+    import numpy as np
+    
+    # url 소스코드 긁어와 table 태그 데이터를 list 형식으로 변환
+    url =  "http://comp.fnguide.com/SVO2/ASP/SVD_FinanceRatio.asp?pGB=1&gicode=" + stock_code + "&cID=&MenuYn=Y&ReportGB=&NewMenuID=104&stkGb=701"
+    source = urlopen(url).read()
+    source = bs4.BeautifulSoup(source, "lxml")
+    table = source.find("table")
+    p = parser.make2d(table)
+    
+    # DataFrame 변환 / 필요없는 행 제거
+    df = pd.DataFrame(p, columns = p[0])
+    num = df.index[df.iloc[:,0].isin(["안정성비율", "성장성비율", "수익성비율", "활동성비율"])]   # IFRS(연결), IFRS(별도) 두 종류이기 때문
+    df = df.drop(num, axis = 0)
+    df = df.drop(0, axis = 0)
+    df = df.reset_index(drop = True)
+    
+    # 재무 비율 데이터만 추출
+    data = df.iloc[0:1]
+    
+    for i in range(2, (len(df) + 1)):
+        a = (3 * i) - 3
+        b = a + 1
+        data = pd.concat([data, df.iloc[a:b]])
+        
+    data = data.reset_index(drop = True)
+    
+    # index name 정리 및 적용
+    list_finance_1 = ['유동비율', '당좌비율', '부채비율', '유보율', '순차입금비율', '이자보상배율', '자기자본비율', '매출액증가율',
+                  '판매비와관리비증가율', '영업이익증가율', 'EBITDA증가율', 'EPS증가율', '매출총이익율', '세전계속사업이익률',
+                  '영업이익률', 'EBITDA마진율', 'ROA', 'ROE', 'ROIC', '총자산회전율', '총부채회전율', '총자본회전율',
+                  '순운전자본회전율']
+    list_finance_2 = ['예대율', '유가증권보유율', '부채비율', '유보율', '순영업손익증가율', '영업이익증가율', '지배주주순이익증가율',
+                  'EPS증가율', '영업이익률', 'ROA', 'ROE']
+
+    list_a = []
+    
+    if len(data) == 23:
+        for i in range(0, len(data)):
+            if (list_finance_1[i] in data.iloc[:,0][i]) == True:
+                list_a.append(list_finance_1[i])
+                
+    else:
+        for j in range(0, len(data)):
+            if (list_finance_2[j] in data.iloc[:,0][j]) == True:
+                list_a.append(list_finance_2[j])
+
+    if data.columns[0] == "IFRS(연결)":
+        data = data.drop(["IFRS(연결)"], axis = 1)
+        data.insert(0, "IFRS(연결)", list_a)
+        
+    elif data.columns[0] == "GAAP(개별)":
+        data = data.drop(["GAAP(개별)"], axis = 1)
+        data.insert(0, "GAAP(개별)", list_a)
+        
+    elif data.columns[0] == "GAAP(연결)":
+        data = data.drop(["GAAP(연결)"], axis = 1)
+        data.insert(0, "GAAP(연결)", list_a)
+
+    else:
+        data = data.drop(["IFRS(별도)"], axis = 1)
+        data.insert(0, "IFRS(별도)", list_a)
+    
+    return data
+{% endhighlight %}
+
+{% highlight ruby %}
+# kospi 재무비율
+list_finance_1 = ['유동비율', '당좌비율', '부채비율', '유보율', '순차입금비율', '이자보상배율', '자기자본비율', '매출액증가율',
+                  '판매비와관리비증가율', '영업이익증가율', 'EBITDA증가율', 'EPS증가율', '매출총이익율', '세전계속사업이익률',
+                  '영업이익률', 'EBITDA마진율', 'ROA', 'ROE', 'ROIC', '총자산회전율', '총부채회전율', '총자본회전율',
+                  '순운전자본회전율']
+kospi_finance = pd.DataFrame(columns = list_finance_1)
+
+all_kospi_code = kospi_stock["code"].tolist()
+
+for i in all_kospi_code:
+    stock_fi_kospi = stock_info(i).iloc[:,1:5].T
+    stock_fi_kospi.columns = stock_info(i).iloc[:,0].tolist()
+    stock_fi_kospi["code"] = i
+    
+    kospi_finance = pd.concat([kospi_finance, stock_fi_kospi])
+
+kospi_finance = kospi_finance.reset_index()
+kospi_finance_all = kospi_finance.rename(columns = {"index" : "time"})
+{% endhighlight %}
+
+{% highlight ruby %}
+# kosdaq 재무비율_1
+kosdaq_finance = pd.DataFrame(columns = list_finance_1)
+
+all_kosdaq_code_1 = kosdaq_stock_1["code"].tolist()
+
+for i in all_kosdaq_code_1:
+    stock_fi_kosdaq = stock_info(i).iloc[:,1:5].T
+    stock_fi_kosdaq.columns = stock_info(i).iloc[:,0].tolist()
+    stock_fi_kosdaq["code"] = i
+    
+    kosdaq_finance = pd.concat([kosdaq_finance, stock_fi_kosdaq])
+    
+# kosdaq 재무비율_2
+all_kosdaq_code_2 = kosdaq_stock_2["code"].tolist()
+
+for i in all_kosdaq_code_2:
+    stock_fi_kosdaq = stock_info(i).iloc[:,1:5].T
+    stock_fi_kosdaq.columns = stock_info(i).iloc[:,0].tolist()
+    stock_fi_kosdaq["code"] = i
+    
+    kosdaq_finance = pd.concat([kosdaq_finance, stock_fi_kosdaq])
+    
+kosdaq_finance = kosdaq_finance.reset_index()
+kosdaq_finance_all = kosdaq_finance.rename(columns = {"index" : "time"})
+{% endhighlight %}
+
+{% highlight ruby %}
+# 코스피, 코스닥 재무비율 병합
+finance_all = pd.concat([kospi_finance_all, kosdaq_finance_all])
+finance_all
+{% endhighlight %}
+<img width="777" alt="스크린샷 2020-11-08 오후 5 44 20" src="https://user-images.githubusercontent.com/70478154/98460714-18f97e80-21ea-11eb-9480-b9323763d76a.png">
+
+마찬가지로, 재무비율 데이터를 저장했다.
+
+{% highlight ruby %}
+# 재무비율 데이터 저장
+finance_all.to_csv("finance_all.csv", header = True, index = False)
+{% endhighlight %}
 
 </details>
-데이터 수집과 전처리는 `다음`과 같은 과정을 거쳤다.
+
+<details>
+<summary>데이터 전처리</summary>
+
+
+</details>
+
+
+
+
+
+
+
 
 정리하여 저장한 데이터를 불러왔다.
 
