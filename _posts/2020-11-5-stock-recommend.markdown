@@ -133,7 +133,7 @@ kospi_stock.rename(columns = {"null" : "code", "null.1" : "stock"}, inplace = Tr
 kospi_stock = kospi_stock.drop(kospi_stock.columns[2:], axis = 1)
 kospi_stock
 {% endhighlight %}
-<img width="171" alt="스크린샷 2020-11-08 오후 5 13 27" src="https://user-images.githubusercontent.com/70478154/98460233-c6b65e80-21e5-11eb-8e80-e628d4a44fc9.png">
+<img width="182" alt="스크린샷 2020-11-08 오후 11 19 03" src="https://user-images.githubusercontent.com/70478154/98467488-ee72ea00-2218-11eb-9751-592903768efa.png">
 
 코스피 종목들 중 펀드 형태의 종목, 관리종목, 거래정지종목들을 제거했다. 또한, 코드를 `A000000` 형태로 변환했다.
 
