@@ -32,6 +32,7 @@ target은 사업보고서 공시 이후 3개월 뒤의 수익률을 산출하여
 
 <details>
 <summary>데이터 수집</summary>
+<div markdown="1">
     
 #### 투자지표
 
@@ -577,12 +578,15 @@ finance_all
 finance_all.to_csv("finance_all.csv", header = True, index = False)
 {% endhighlight %}
 
+</div>
 </details>
 
 <details>
 <summary>데이터 전처리</summary>
+<div markdown="1">
+    
 
-
+</div>
 </details>
 
 
