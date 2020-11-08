@@ -1252,9 +1252,9 @@ pdp_plot(isolated, feature_name = feature_3, plot_params = {'font_family' : 'App
 
 {% highlight ruby %}
 # PDP - PBR
-plt.rcParams['figure.dpi'] = 144
-
 from pdpbox.pdp import pdp_isolate, pdp_plot
+
+plt.rcParams['figure.dpi'] = 144
 
 X_test_df = pd.DataFrame(X_test_scaler, columns = X_test_3M.columns.tolist())
 
@@ -1275,9 +1275,9 @@ pdp_plot(isolated, feature_name = feature_4);
 
 {% highlight ruby %}
 # PDP - PER
-plt.rcParams['figure.dpi'] = 144
-
 from pdpbox.pdp import pdp_isolate, pdp_plot
+
+plt.rcParams['figure.dpi'] = 144
 
 X_test_df = pd.DataFrame(X_test_scaler, columns = X_test_3M.columns.tolist())
 
