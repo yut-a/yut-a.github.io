@@ -31,7 +31,7 @@ target은 사업보고서 공시 이후 3개월 뒤의 수익률을 산출하여
 ## 적용 과정
 
 <details>
-<summary>**__데이터 수집__**</summary>
+<summary>데이터 수집</summary>
 <div markdown="1">
 <BR/><BR/>
 #### 투자지표
@@ -580,21 +580,323 @@ finance_all.to_csv("finance_all.csv", header = True, index = False)
 
 </div>
 </details>
-
+<BR/>
 <details>
 <summary>데이터 전처리</summary>
 <div markdown="1">
+<BR/><BR/>
+수집한 재무비율, 투자지표 데이터들을 불러와 병합했다.
+
+{% highlight ruby %}
+# 데이터 불러오기
+import pandas as pd
+
+finance_all = pd.read_csv("finance_all.csv")        # 재무비율 데이터
+invest_all = pd.read_csv("invest_all.csv")          # 투자지표 데이터
+
+# 데이터 병합
+all_stock = pd.merge(finance_all, invest_all, on = ["time", "code"], how = "inner")
+all_stock
+{% endhighlight %}
+<img width="779" alt="스크린샷 2020-11-08 오후 6 07 44" src="https://user-images.githubusercontent.com/70478154/98461172-59a6c700-21ed-11eb-9841-5a372b1a47cc.png">
+
+먼저, target 데이터가 사업보고서 공시 직후부터 3개월 뒤의 주가 상승 혹은 하락이기 때문에 외부 경제 상황, 이슈 등을 동일하게 하여 분석의 일관성을 유지하기 위해 12월 결산을 제외한 데이터들을 삭제했다. 즉, time 칼럼에서 `0000/12`가 아닌 데이터들을 제거했다.
+
+{% highlight ruby %}
+# 12월 결산을 제외한 데이터 삭제
+all_stock_data = all_stock.copy()
+time_list = all_stock_data["time"].unique().tolist()
+
+for i in ["2016/12", "2017/12", "2018/12", "2019/12"]:
+    time_list.remove(i)
+
+num_list = []
+
+for i in time_list:
+    num = all_stock[all_stock["time"] == i].index
+    num_list.append(num)
+
+for i in range(0, 20):
+    all_stock_data = all_stock_data.drop(num_list[i], axis = 0)
     
+all_stock_data = all_stock_data.reset_index(drop = True)
+{% endhighlight %}
+
+다음은, 결측치가 문자열로 되어있는 데이터를 결측치의 형태로 바꿔준 후, 한 행에서 결측치가 9개 이상인 행을 삭제했다. 그 후, 분석에서 사용하지 않을 칼럼인 순차입금비율, 순운전자본회전율, DPS(보통주,현금), DPS(1우선주,현금)를 제외했다. 다른 데이터와 겹치는 특성을 가지고 있거나 결측치가 매우 많은 칼럼을 제거했다.
+
+{% highlight ruby %}
+# 결측치인데 문자열로 되어있는 데이터 처리
+import numpy as np
+
+for i in range(0, len(all_stock_data.columns)):
+    if "N/A(IFRS)" in list(all_stock_data.iloc[:,i]):
+        all_stock_data.iloc[:,i] = all_stock_data.iloc[:,i].replace("N/A(IFRS)", np.nan)
+        
+# 한 행의 결측치가 9개 이상인 행 삭제
+index_nan = pd.DataFrame(all_stock_data.isnull().sum(1) >= 9)
+index_nan_list = list(index_nan[index_nan[0] == True].index)
+
+all_stock_data = all_stock_data.drop(index_nan_list, axis = 0).reset_index(drop = True)
+
+# 필요없는 feature 제거
+all_stock_data = all_stock_data.drop(["순차입금비율", "순운전자본회전율", "DPS(보통주,현금)", "DPS(1우선주,현금)"], axis = 1)
+all_stock_data
+{% endhighlight %}
+
+또, 완전잠식 데이터가 있는 행을 제거했다.
+
+{% highlight ruby %}
+# 완전잠식 데이터가 있는 행 제거
+import itertools
+
+drop_list = []
+
+for i in [3, 6, 17, 21]:
+    drop_data = list(all_stock_data[all_stock_data.iloc[:,i] == "완전잠식"].index)
+    drop_list.append(drop_data)
+    
+drop_list = list(set(list(itertools.chain.from_iterable(drop_list))))
+
+all_stock_data = all_stock_data.drop(drop_list, axis = 0).reset_index(drop = True)
+all_stock_data
+{% endhighlight %}
+<img width="781" alt="스크린샷 2020-11-08 오후 6 20 06" src="https://user-images.githubusercontent.com/70478154/98461396-19e0df00-21ef-11eb-91cf-5b6cf27c3b3b.png">
+
+target을 생성하기 위해, 보고서 공시 직후의 종목 별 종가 데이터를 불러왔다. 대체로 12월 결산 보고서는 다음 해 3월 말, 4월 초에 공시가 되기 때문에 약간의 여유를 두고 4월 10일 종가를 기준으로 했다. 만약 그 날이 주말인 경우, 그 다음주 월요일 종가를 기준으로 했다.
+
+{% highlight ruby %}
+# 기준 가격 (공시 직후 가격)
+kospi_17_4 = pd.read_csv("kospi_17_4.csv")
+kospi_18_4 = pd.read_csv("kospi_18_4.csv")
+kospi_19_4 = pd.read_csv("kospi_19_4.csv")
+kospi_20_4 = pd.read_csv("kospi_20_4.csv")
+
+kosdaq_17_4 = pd.read_csv("kosdaq_17_4.csv")
+kosdaq_18_4 = pd.read_csv("kosdaq_18_4.csv")
+kosdaq_19_4 = pd.read_csv("kosdaq_19_4.csv")
+kosdaq_20_4 = pd.read_csv("kosdaq_20_4.csv")
+{% endhighlight %}
+
+{% highlight ruby %}
+# time 칼럼 추가
+kospi_17_4["time"] = "2016/12"
+kospi_18_4["time"] = "2017/12"
+kospi_19_4["time"] = "2018/12"
+kospi_20_4["time"] = "2019/12"
+
+kosdaq_17_4["time"] = "2016/12"
+kosdaq_18_4["time"] = "2017/12"
+kosdaq_19_4["time"] = "2018/12"
+kosdaq_20_4["time"] = "2019/12"
+{% endhighlight %}
+
+{% highlight ruby %}
+# 데이터 병합
+all_price = kospi_17_4.copy()
+
+for i in [kospi_18_4, kospi_19_4, kospi_20_4, kosdaq_17_4, kosdaq_18_4, kosdaq_19_4, kosdaq_20_4]:
+    all_price = pd.concat([all_price, i])
+    
+all_price = all_price.rename(columns = {"null.2" : "price"}).reset_index(drop = True)
+all_price
+{% endhighlight %}
+
+{% highlight ruby %}
+# 전처리를 위한 함수
+def change_price(df):
+    
+    # 칼럼 명 변경 및 필요없는 칼럼 삭제
+    df = df.drop(["null.3", "null.4", "null.5", "null.6", "null.7"], axis = 1)
+    df = df.rename(columns = {"null" : "code", "null.1" : "stock"})
+    
+    # A000000 형태로 종목코드 변경
+    df = df.astype({"code" : str})
+    code_list = df["code"].tolist()
+
+    code_change = []
+
+    for i in range(0, len(code_list)):
+        if len(code_list[i]) == 6:
+            code_data = "A" + code_list[i]
+    
+        elif len(code_list[i]) == 5:
+            code_data = "A0" + code_list[i]
+        
+        elif len(code_list[i]) == 4:
+            code_data = "A00" + code_list[i]
+        
+        elif len(code_list[i]) == 3:
+            code_data = "A000" + code_list[i]
+    
+        elif len(code_list[i]) == 2:
+            code_data = "A0000" + code_list[i]
+        
+        elif len(code_list[i]) == 1:
+            code_data = "A00000" + code_list[i]
+        
+        code_change.append(code_data)
+    
+    df = df.drop(["code"], axis = 1)
+    df.insert(0, "code", code_change)
+
+    # - 제거
+    index_empty = df[df.iloc[:,2] == "-"].index
+    df = df.drop(index_empty).reset_index(drop = True)
+
+    # price 데이터 숫자형으로 변경
+    df.iloc[:,2] = df.iloc[:,2].str.replace(",", "")
+    df = df.astype({df.columns[2] : int})
+    
+    return df
+{% endhighlight %}
+
+{% highlight ruby %}
+# 함수 적용
+all_price = change_price(all_price)
+all_price
+{% endhighlight %}
+<img width="301" alt="스크린샷 2020-11-08 오후 6 29 12" src="https://user-images.githubusercontent.com/70478154/98461552-58c36480-21f0-11eb-9ba6-5e22de9c435f.png">
+
+기준 가격에 대한 데이터를 불러와 정리한 후, 기준 가격의 시점을 기준으로 3개월 뒤의 종가를 불러와 마찬가지로 정리했다.
+
+{% highlight ruby %}
+# 3개월 후 가격
+kospi_17_7 = pd.read_csv("kospi_17_7.csv")
+kospi_18_7 = pd.read_csv("kospi_18_7.csv")
+kospi_19_7 = pd.read_csv("kospi_19_7.csv")
+kospi_20_7 = pd.read_csv("kospi_20_7.csv")
+
+kosdaq_17_7 = pd.read_csv("kosdaq_17_7.csv")
+kosdaq_18_7 = pd.read_csv("kosdaq_18_7.csv")
+kosdaq_19_7 = pd.read_csv("kosdaq_19_7.csv")
+kosdaq_20_7 = pd.read_csv("kosdaq_20_7.csv")
+{% endhighlight %}
+
+{% highlight ruby %}
+# time 칼럼 추가
+kospi_17_7["time"] = "2016/12"
+kospi_18_7["time"] = "2017/12"
+kospi_19_7["time"] = "2018/12"
+kospi_20_7["time"] = "2019/12"
+
+kosdaq_17_7["time"] = "2016/12"
+kosdaq_18_7["time"] = "2017/12"
+kosdaq_19_7["time"] = "2018/12"
+kosdaq_20_7["time"] = "2019/12"
+{% endhighlight %}
+
+{% highlight ruby %}
+# 데이터 병합
+after_3M = kospi_17_7.copy()
+
+for i in [kospi_18_7, kospi_19_7, kospi_20_7, kosdaq_17_7, kosdaq_18_7, kosdaq_19_7, kosdaq_20_7]:
+    after_3M = pd.concat([after_3M, i])
+    
+after_3M = after_3M.rename(columns = {"null.2" : "after_3M"}).reset_index(drop = True)
+after_3M
+{% endhighlight %}
+
+{% highlight ruby %}
+# 함수 적용
+after_3M = change_price(after_3M)
+after_3M
+{% endhighlight %}
+<img width="309" alt="스크린샷 2020-11-08 오후 6 32 12" src="https://user-images.githubusercontent.com/70478154/98461592-c2dc0980-21f0-11eb-9151-2aa2f035e179.png">
+
+종목 별 재무비율, 투자지표 데이터를 기준으로 정리한 기준 가격과 3개월 뒤의 종가를 병합했다.
+
+{% highlight ruby %}
+# 기준 가격 병합
+all_stock_info = all_stock_data.copy()
+all_stock_info = pd.merge(all_stock_info, all_price, on = ["code", "stock", "time"], how = "inner")
+
+# 기준 가격에 3개월 후 가격 병합
+all_stock_info_3M = pd.merge(all_stock_info, after_3M, on = ["code", "stock", "time"], how = "inner")
+all_stock_info_3M
+{% endhighlight %}
+<img width="788" alt="스크린샷 2020-11-08 오후 6 37 00" src="https://user-images.githubusercontent.com/70478154/98461668-77762b00-21f1-11eb-90d3-f850c206c3e9.png">
+
+마지막으로, 몇몇 칼럼들에 존재하는 `흑자전환` `적자전환` `적자지속`과 같은 범주형 데이터들을 처리했다. 이 범주형 데이터의 수가 매우 적은 경우는 0으로 변환하고, 수가 많은 경우 새로운 feature를 만들어 처리했다. 또한, 분석에 활용할 데이터들의 타입을 숫자형으로 변경한 후, 데이터를 저장했다.
+
+{% highlight ruby %}
+def replace_str(df):
+    
+    # 판매비와관리비증가율의 흑전, 적전, 적지를 0으로 변환 (데이터 수가 너무 적어서)
+    for i in ["흑전", "적전", "적지"]:
+        df["판매비와관리비증가율"] = df["판매비와관리비증가율"].replace(i, 0)
+        
+    # 영업이익증가율, EBITDA증가율, EPS증가율의 흑전, 적전, 적지를 0으로 변환
+    df["영업이익증가율_cat"] = df["영업이익증가율"]
+    df["EBITDA증가율_cat"] = df["EBITDA증가율"]
+    df["EPS증가율_cat"] = df["EPS증가율"]
+    
+    for i in ["흑전", "적전", "적지"]:
+        for j in [9, 10, 11]:
+            df.iloc[:,j] = df.iloc[:,j].replace(i, 0)
+        
+    # 추가한 범주형 feature에 흑전, 적전, 적지를 제외한 데이터들 모두 0으로 변환
+    for i in range(0, len(df["영업이익증가율_cat"])):
+        data_1 = df["영업이익증가율_cat"][i]
+    
+        if data_1 != "흑전" and data_1 != "적전" and data_1 != "적지":
+            df["영업이익증가율_cat"] = df["영업이익증가율_cat"].replace(data_1, 0)
+            
+    for i in range(0, len(df["EBITDA증가율_cat"])):
+        data_2 = df["EBITDA증가율_cat"][i]
+        
+        if data_2 != "흑전" and data_2 != "적전" and data_2 != "적지":
+            df["EBITDA증가율_cat"] = df["EBITDA증가율_cat"].replace(data_2, 0)
+            
+    for i in range(0, len(df["EPS증가율_cat"])):
+        data_3 = df["EPS증가율_cat"][i]
+        
+        if data_3 != "흑전" and data_3 != "적전" and data_3 != "적지":
+            df["EPS증가율_cat"] = df["EPS증가율_cat"].replace(data_3, 0)
+            
+    # 추가한 범주형 feature에 흑전, 적전, 적지를 각각 1, -1, -2로 변환
+    for j in [41, 42, 43]:
+        df.iloc[:,j] = df.iloc[:,j].replace("흑전", 1)
+        df.iloc[:,j] = df.iloc[:,j].replace("적전", -1)
+        df.iloc[:,j] = df.iloc[:,j].replace("적지", -2)
+    
+    return df
+{% endhighlight %}
+
+{% highlight ruby %}
+# 함수 적용
+all_stock_info_3M = replace_str(all_stock_info_3M)
+{% endhighlight %}
+
+{% highlight ruby %}
+# 숫자형으로 데이터 타입 변경
+def to_float(df):
+    for i in range(0, len(df.columns)):
+        if df.dtypes[i] == "object":
+            df.iloc[:,i] = df.iloc[:,i].str.replace(",", "")
+            
+    col_df = df.drop(df.columns[40], axis = 1)
+    cols = col_df.drop(["time", "code", "stock", "price", "영업이익증가율_cat", "EBITDA증가율_cat", "EPS증가율_cat"], axis = 1).columns
+    
+    for col in cols:
+        df = df.astype({col : "float"})
+        
+    return df
+{% endhighlight %}
+
+{% highlight ruby %}
+# 함수 적용
+all_stock_info_3M = to_float(all_stock_info_3M)
+all_stock_info_3M
+{% endhighlight %}
+<img width="781" alt="스크린샷 2020-11-08 오후 6 41 52" src="https://user-images.githubusercontent.com/70478154/98461745-1ef35d80-21f2-11eb-9251-cf92201cb059.png">
+
+{% highlight ruby %}
+# 데이터 저장
+all_stock_info_3M.to_csv("all_stock_info_3M.csv", header = True, index = False)
+{% endhighlight %}
 
 </div>
 </details>
-
-
-
-
-
-
-
 <BR/><BR/>
 정리하여 저장한 데이터를 불러왔다.
 
