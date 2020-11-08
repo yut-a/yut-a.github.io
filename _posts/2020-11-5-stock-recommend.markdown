@@ -31,7 +31,7 @@ target은 사업보고서 공시 이후 3개월 뒤의 수익률을 산출하여
 ## 적용 과정
 <BR/>
 <details>
-<summary><I><B>데이터 수집</B></I></summary>
+<summary><I><B><BIG>데이터 수집</BIG></B></I></summary>
 <div markdown="1">
 <BR/><BR/>
 #### 투자지표
