@@ -129,7 +129,9 @@ if __name__ == "__main__":
     # documents 추가
     collection.insert_many(doc_list)
 {% endhighlight %}
-<img width="876" alt="스크린샷 2020-11-23 오전 4 19 36" src="https://user-images.githubusercontent.com/70478154/99914790-2dd62600-2d43-11eb-94d9-cd3a1812ced9.png">
+<img width="876" alt="스크린샷 2020-11-23 오전 4 19 36" src="https://user-images.githubusercontent.com/70478154/99914790-2dd62600-2d43-11eb-94d9-cd3a1812ced9.png"><BR/><BR/><BR/><BR/>
 
+## 결론
 
+위의 과정을 거치면서 csv 파일을 MongoDB에 옮기는 방법에 대해 알아보았고, 데이터가 table의 형태가 아닌 documents 형태로 저장되는 것을 확인했다. 지금까지 다뤘던 데이터의 대부분이 csv 형태이기 때문에 위와 같은 방법을 사용한다면, 유용하게 데이터들을 데이터베이스로 저장하고 관리할 수 있을 것이다.
 
