@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  csv 파일을 MongoDB에 옮기기
+title:  CSV 파일을 MongoDB에 옮기기
 date:   2020-11-22
 image:  database.jpg
 tags:   Data
@@ -26,4 +26,26 @@ tags:   Data
 **MongoDB**는 이러한 NoSQL의 특징을 잘 반영한 범용 데이터베이스이다. NoSQL에 대한 잘 알려진 데이터베이스들 중 하나이다.<BR/><BR/><BR/><BR/>
 
 ## CSV 파일을 MongoDB에 옮기기
+
+csv 형태의 파일을 데이터베이스로 저장하기 위한 방법을 알아보고자 한다. 사용한 csv 파일은 코스피 시장에 상장되어 있는 종목들의 리스트와 관련 거래 정보의 데이터들이다. 칼럼 명이 제대로 나와있지 않은데, 좌측부터 `종목코드` `종목명` `현재가` `전일 대비 등락` `등락률` `거래대금` `시가총액`을 나타낸다.
+<img width="565" alt="스크린샷 2020-11-23 오전 2 13 00" src="https://user-images.githubusercontent.com/70478154/99910459-800e4b80-2d31-11eb-9116-f9edeb36d9de.png">
+
+먼저, 다음과 같은 파이썬 라이브러리를 불러온다. `csv`와 `os`는 csv 파일을 불러오고, `.env`에 저장된 개인 정보를 읽어오는데 사용된다. `load_dotenv`는 `.env`의 내용을 load하는데 사용된다. `MongoClient`는 데이터를 옮기기 위해 MongoDB와 연결하기 위한 라이브러리이다.
+
+{% highlight ruby %}
+import csv
+import os
+from dotenv import load_dotenv
+from pymongo import MongoClient
+{% endhighlight %}
+
+
+
+
+
+
+
+
+
+
 
