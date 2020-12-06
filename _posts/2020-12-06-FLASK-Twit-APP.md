@@ -33,5 +33,57 @@ FLASK를 통해 만들고자 하는 어플리케이션은 다음과 같다. Twit
 `compare`는 선택한 두 유저 중, 입력한 Text가 어느 유저의 트윗일지 예측해준다. 다음과 같이 두 유저에 adidas와 한국은행을 입력하고, 예측에 사용할 Text를 dollar로 입력했다. 예측 결과, dollar라는 Text는 한국은행의 트윗일 것이란 예측 결과를 확인할 수 있다.
 <img width="1440" alt="스크린샷 2020-12-07 오전 3 36 35" src="https://user-images.githubusercontent.com/70478154/101289065-6eeb3180-383d-11eb-99c2-1fb177cb7e90.png"><BR/><BR/><BR/><BR/>
 
-## 적용 과정
+## 간단한 적용 과정
 
+먼저, 다음과 같이 Flask를 설정하고, 데이터베이스를 연결한다. 기존에 데이터베이스가 없을 경우, 빈 데이터베이스로 생성되어 연결된다.
+
+{% highlight ruby %}
+# init
+from flask import Flask
+
+app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///twitter_app.sqlite3"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+{% endhighlight %}
+
+다음, 연결한 데이터베이스에 테이블과 칼럼을 설정한다. 테이블의 기본키와 외래키 역시 설정해준다. 데이터베이스의 스키마는 아래와 같다.
+
+{% highlight ruby %}
+# database
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
+db = SQLAlchemy()
+migrate = Migrate()
+
+class User(db.Model):
+    __tablename__ = "User"
+    id = db.Column(db.BigInteger, primary_key = True)
+    username = db.Column(db.String)
+    full_name = db.Column(db.String)
+    followers = db.Column(db.Integer)
+
+    def __repr__(self):
+        return "< User {} {} >".format(self.id, self.username)
+
+class Tweet(db.Model):
+    __tablename__ = "Tweet"
+    id = db.Column(db.BigInteger, primary_key = True)
+    text = db.Column(db.String)
+    embedding = db.Column(db.PickleType)
+    user_id = db.Column(db.BigInteger, db.ForeignKey("User.id"))
+
+    user = db.relationship("User", backref = db.backref("Tweet", lazy = True))
+
+    def __repr__(self):
+        return "< Tweet {} >".format(self.id)
+{% endhighlight %}
+<img width="559" alt="스크린샷 2020-12-07 오전 3 48 08" src="https://user-images.githubusercontent.com/70478154/101289324-1321a800-383f-11eb-9003-c106008b53f3.png">
+
+그 후, 위에서 언급한 `Add` `get` `compare` 등 원하는 기능을 수행하도록 route를 구성한다.<BR/><BR/><BR/><BR/>
+
+## 결론
+
+이러한 웹 어플리케이션을 만들면서 맞닥뜨렸던 가장 큰 어려움은 `오류`였다. 열심히 작성한 코드를 실행했을 때, 도무지 알아들을 수 없는 오류가 발생하면서 하얀 웹 페이지에 `ERROR`라는 글자가 나타나는 것이 가장 힘들었다. 코드 한 줄의 결과가 바로 눈 앞에 보이는 것이 아니기 때문에 어떤 부분에서 오류가 발생했는지 바로 파악하기 어려웠다. 이러한 문제는 코드가 길어질수록 더 빈번하게 발생했다. 당연한 이야기일 수 있겠지만, 이를 보완하기 위해 본격적으로 코드를 작성하기 전, 함수의 형태가 아닌 간단한 예시의 개별 코드를 작성하여 결과를 먼저 확인했다. 또한, `breakpoint`를 애용했다. breakpoint의 위치를 옮겨가면서 입력한 코드의 값들을 확인하고, 어떤 부분에서 오류가 발생했는지 파악했다. 비록 시간이 오래걸리기는 했지만, 이러한 과정을 통해서 오류를 해결하며 천천히 진행할 수 있었다.
+
+간단한 웹 어플리케이션을 만들면서, 평소에 자주 사용하던 웹 사이트의 버튼들이 어떤 식으로 작동하는지 조금이나마 이해할 수 있는 시간이었다. 기회가 된다면, 더 많은 기능을 구현할 수 있는, 완성도 높은 어플리케이션을 만들어보고 싶다.
