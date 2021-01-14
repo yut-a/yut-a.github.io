@@ -2,7 +2,7 @@
 layout: post
 title:  LSTM을 활용한 Risk Parity 전략 구현
 date:   2021-01-12
-image:  .jpg
+image:  weight.png
 tags:   Data Finance
 ---
 ## Risk Parity 전략 소개
