@@ -62,6 +62,7 @@ def lstm():
     
     return model
 {% endhighlight %}
+<BR/><BR/>
 
 #### 학습 방법: Moving Window
 
@@ -175,11 +176,13 @@ def train_test_result(x, y, model, data_name = ""):
         
     return all_test_pred, actual
 {% endhighlight %}
+<BR/><BR/>
 
 #### 학습 결과
 
 LSTM을 활용하여 변동성을 예측한 결과는 다음과 같다. 실제의 변동성 추이와 비교했을 때 두 자산 모두 좋은 예측 결과를 보인 것은 아니다. 하지만, 상대적으로 S&P500 ETF는 어느정도 비슷한 추이를 보였다. 더 적합한 LSTM 구조를 쌓고, 하이퍼 파라미터 튜닝을 더 진행한다면 지금보다 좋은 결과를 만들어 낼 수 있을 것이라 생각한다.
 <img width="1144" alt="스크린샷 2021-01-14 오후 12 59 54" src="https://user-images.githubusercontent.com/70478154/104543228-6d94fc00-5668-11eb-84eb-aec3ca96b730.png">
+<BR/><BR/>
 
 #### 전략 구현
 
@@ -291,6 +294,7 @@ def risk_parity_pf(data_1, data_2, data_1_pred, data_2_pred):
     
     return df
 {% endhighlight %}
+<BR/><BR/>
 
 #### Benchmark 전략과 비교
 
@@ -332,6 +336,7 @@ def cum_lev_return(pf, other_pf):
     
     return monthly_cum_return, asset_value
 {% endhighlight %}
+<BR/><BR/>
 
 #### 성과 지표
 
