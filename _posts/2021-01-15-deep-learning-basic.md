@@ -2,7 +2,7 @@
 layout: post
 title:  Deep Learning 기초
 date:   2021-01-15
-image:  .png
+image:  ai.jpg
 tags:   Data
 ---
 ## NN 기초
