@@ -61,16 +61,19 @@ softmax는 다중 분류에서 많이 사용되는 함수이다. 가장 높은 �
 ![CodeCogsEqn](https://user-images.githubusercontent.com/70478154/104723844-2fd0ca00-5773-11eb-9684-bd070426422f.gif)
 
 * `MAE (Mean Absolute Error)`<BR/>
-MSE와 마찬가지로 회귀 문제를 풀고자 할 때 사용하며, MSE와는 약간 다르게 제곱을 하지 않고 절대값에 대한 평균으로 산출한다.
+MSE와 마찬가지로 회귀 문제를 풀고자 할 때 사용하며, MSE와는 약간 다르게 제곱을 하지 않고 절대값에 대한 평균으로 산출한다.<BR/>
+![CodeCogsEqn (1)](https://user-images.githubusercontent.com/70478154/104724195-af5e9900-5773-11eb-89bf-092df3731db1.gif)
 
 * `Binary Crossentropy`<BR/>
-이진 분류 문제를 풀고자 할 때 사용한다.
+이진 분류 문제를 풀고자 할 때 사용한다.<BR/>
+![CodeCogsEqn (2)](https://user-images.githubusercontent.com/70478154/104724429-07959b00-5774-11eb-8152-1d70cdf3b486.gif)
 
 * `Categorial Crossentropy`<BR/>
-3개 이상의 분류 문제를 풀고자 할 때 사용한다. 특히, 라벨이 [1, 0, 0], [0, 1, 0], [0, 0, 1]과 같이 one-hot 형태일 때 사용한다.
+3개 이상의 분류 문제를 풀고자 할 때 사용한다. 특히, 라벨이 [1, 0, 0], [0, 1, 0], [0, 0, 1]과 같이 one-hot 형태일 때 사용한다.<BR/>
+![CodeCogsEqn (3)](https://user-images.githubusercontent.com/70478154/104724622-46c3ec00-5774-11eb-8166-e080bad2b377.gif)
 
 * `Sparse Categorical Crossentropy`<BR/>
-3개 이상의 분류 문제를 풀고자 할 때 사용하며, 라벨이 정수 형태일 때 사용한다.
+3개 이상의 분류 문제를 풀고자 할 때 사용하며, 라벨이 정수 형태일 때 사용한다.<BR/>
 <BR/>
 
 #### `Batch`
