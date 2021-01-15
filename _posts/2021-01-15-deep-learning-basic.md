@@ -5,6 +5,8 @@ date:   2021-01-15
 image:  ai.jpg
 tags:   Data
 ---
+![map-2](https://user-images.githubusercontent.com/70478154/104743438-0d4caa00-578f-11eb-841d-c80239adca72.jpeg)
+
 ## NN 기초
 <BR/>
 
