@@ -66,7 +66,7 @@ MSE와 마찬가지로 회귀 문제를 풀고자 할 때 사용하며, MSE와�
 
 * `Sparse Categorical Crossentropy`<BR/>
 3개 이상의 분류 문제를 풀고자 할 때 사용하며, 라벨이 정수 형태일 때 사용한다.
-<BR/><BR/>
+<BR/>
 
 #### `Batch`
 Batch는 전체 데이터 셋을 여러 작은 그룹으로 나누는 것을 말하며, 하나의 소그룹 안에 속하는 데이터의 크기를 batch size라고 한다. 것Batch size가 크면 메모리의 한계와 속도 저하 문제가 발생할 수 있기 때문에 적절한 batch size 할당이 필요하다.
@@ -96,7 +96,7 @@ dropout은 설정한 확률로 연결을 강제로 끊어주는 역할을 한다
 
 * `Learning rate`<BR/>
 학습이 진행될수록 학습률을 감소시키는 방법이다.
-<BR/><BR/>
+<BR/>
 
 #### `Transfer learning`
 기존 데이터로 학습된 네트워크를 재사용 가능하도록 하는 라이브러리이다. 학습 데이터를 적게 사용할 수 있고, 학습 속도가 빠르며, 더 잘 일반화된 모델을 만들 수 있다는 장점이 있다.<BR/><BR/><BR/><BR/>
@@ -105,12 +105,46 @@ dropout은 설정한 확률로 연결을 강제로 끊어주는 역할을 한다
 <BR/>
 
 #### `Convolution`
-* `filter`<BR/>
+* `Filter`<BR/>
 가중치의 집합으로 이루어져 데이터의 특징을 잡아낸다.
 
-* stride : filter를 얼만큼씩 움직일 지 결정한다. Stride가 1이면 한 칸씩 움직이고, 2이면 두 칸씩 움직인다.
-	* padding : 데이터 셋의 외곽에 0 또는 다른 값을 배치하는 방법이다. Padding을 하지 않을 경우, 데이터 셋의 각 모서리 부분은 다른 부분에 비해 사용되는 횟수가 줄어든다. 따라서 골고루 데이터를 이용하고자 사용하는 방법이다.
+* `Stride`<BR/>
+filter를 얼만큼씩 움직일 지 결정한다. Stride가 1이면 한 칸씩 움직이고, 2이면 두 칸씩 움직인다.
 
-- Pooling : pooling은 convolution layer와 activation을 거쳐 나온 값을 중에서 일부를 추출하는 것이다. pooling에는 다양한 종류가 있지만, 대표적으로 가장 큰 값을 추출하는 max pooling, 평균값을 추출하는 average pooling이 있다.
+* `Padding`<BR/>
+데이터 셋의 외곽에 0 또는 다른 값을 배치하는 방법이다. Padding을 하지 않을 경우, 데이터 셋의 각 모서리 부분은 다른 부분에 비해 사용되는 횟수가 줄어든다. 따라서 골고루 데이터를 이용하고자 사용하는 방법이다.
+<BR/>
+
+#### `Pooling`
+pooling은 convolution layer와 activation을 거쳐 나온 값을 중에서 일부를 추출하는 것이다. pooling에는 다양한 종류가 있지만, 대표적으로 가장 큰 값을 추출하는 max pooling, 평균값을 추출하는 average pooling이 있다.<BR/><BR/><BR/><BR/>
+
+## RNN
+<BR/>
+
+#### `RNN`
+RNN은 기본적인 신경망에 재귀 연결을 두면서 시간 축 정보를 반영할 수 있도록 만든 구조이다. 자기 자신의 입력으로 돌아가는 Edge가 존재하여 시퀀스 데이터를 다루기에 적절하다.
+<BR/><BR/>
+
+#### `LSTM`
+LSTM은 RNN에 Gate를 추가한 모델이다. RNN의 gradient vanishing 문제를 해결하기 위해 고안되었다. 3가지 gate인 Forget gate, input gate, output gate를 통해 최근 이벤트에 더 많은 비중을 둘 수도 있으면서 동시에 오래된 정보를 완전히 잃지 않을 수 있다는 장점을 가지고 있다.
+<BR/><BR/>
+
+#### `GRU`
+LSTM은 많은 gate를 가지고 있기 때문에 이를 간소화한 모델이 GRU이다.
+<BR/><BR/>
+
+#### `Attention`
+Atttention은 RNN 기반의 모델이 가지는 주요 문제점인 정보 손실과 gradient vanishing을 해결하고자 등장했다. Attention은 문장 소스의 길이가 긴 문장의 기억을 돕기 위해 만들어졌다. 핵심 아이디어는 기계 번역 모델이 출력단어를 예측할 때 특정 단어를 집중해서 본다는 것이다.<BR/><BR/><BR/><BR/>
+
+## 
+
+
+
+
+
+
+
+
+
 
 
