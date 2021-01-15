@@ -23,15 +23,19 @@ INPUT으로 받은 값을 각 뉴런에 전달하게 되는데 그 과정에서 
 #### `활성화 함수`
 * `sigmoid`<BR/>
 sigmoid는 0과 1 사이의 범위를 가지고 있으며, 이진 분류 문제에 적절하다. 그림에서 보는 것처럼 INPUT 값이 매우 크거나 작을 경우 기울기가 0에 가까워진다. 이러한 경우, 층이 깊을수록 작은 기울기 값들이 곱해지면서 기울기가 점점 작아지는 gradient vanishing 문제가 발생할 수 있다. 또한, 학습을 지그재그 형태로 만들어 학습이 느려지는 문제가 발생한다.
+<img width="479" alt="스크린샷 2021-01-15 오후 8 17 11" src="https://user-images.githubusercontent.com/70478154/104718854-e5e5e500-576e-11eb-9b00-4c608aff154f.png">
 
 * `tanh`<BR/>
 sigmoid와 유사한 형태이지만 -1과 1 사이의 범위를 가지고 있다. 함수의 중심값을 0으로 옮겨 sigmoid의 학습 과정이 느려지는 문제를 해결했다. 하지만, 여전히 gradient vanishing 문제를 해결하지는 못했다.
+<img width="481" alt="스크린샷 2021-01-15 오후 8 17 28" src="https://user-images.githubusercontent.com/70478154/104718879-f39b6a80-576e-11eb-8715-678c353160e9.png">
 
 * `ReLU`<BR/>
 음수값은 0으로, 양수값은 그 값 그대로 출력하는 함수이다. 양수값이면 기울기가 항상 1이기 때문에 gradient vanishing 문제가 발생하지 않는다. 다만, 음수값이라면 기울기가 0이 되어 소멸한다는 문제가 발생한다.
+<img width="487" alt="스크린샷 2021-01-15 오후 8 17 42" src="https://user-images.githubusercontent.com/70478154/104718886-f6965b00-576e-11eb-86ce-ca0d9fa802fd.png">
 
 * `Leaky ReLU`<BR/>
 음수값을 가질 때 기울기가 0이 되어 소멸하는 ReLU의 문제점을 완화하기 위한 활성화 함수이다. 음수인 경우, 0.01이거나 다른 작은 값을 갖도록 한다.
+<img width="482" alt="스크린샷 2021-01-15 오후 8 17 56" src="https://user-images.githubusercontent.com/70478154/104718915-03b34a00-576f-11eb-89a3-7ac035ee737a.png">
 
 * `softmax`<BR/>
 softmax는 다중 분류에서 많이 사용되는 함수이다. 가장 높은 확률값을 가지는 클래스를 출력한다.
