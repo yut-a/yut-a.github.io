@@ -58,7 +58,7 @@ softmax는 다중 분류에서 많이 사용되는 함수이다. 가장 높은 �
 실제 값과 출력 값의 차이를 최소화할 수 있는 가중치를 학습하게 되는데, 그 차이를 측정해주는 함수가 손실함수이다.
 * `MSE (Mean Squared Error)`<BR/>
 회귀 문제를 풀고자 할 때 사용한다. 예측값과 실제 값의 차이에 대한 제곱을 평균으로 산출한 값이다.
-$${L} = \sum\limits_{i=1}^N {y_i-t_i}^2$$
+![CodeCogsEqn](https://user-images.githubusercontent.com/70478154/104723844-2fd0ca00-5773-11eb-9684-bd070426422f.gif)
 
 * `MAE (Mean Absolute Error)`<BR/>
 MSE와 마찬가지로 회귀 문제를 풀고자 할 때 사용하며, MSE와는 약간 다르게 제곱을 하지 않고 절대값에 대한 평균으로 산출한다.
