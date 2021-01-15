@@ -139,7 +139,7 @@ Atttention은 RNN 기반의 모델이 가지는 주요 문제점인 정보 손�
 ## AE (Auto Encoder)
 <BR/>
 
-#### `Auto encoder`
+#### `AE`
 Auto encoder는 데이터의 중요한 특성을 추출하여 출력값을 입력값처럼 만들 수 있도록 훈련하는 모델이다. Auto encoder는 encoder와 decoder로 구성되어 있다. 입력값이 들어와 encoder 부분에서 레이어를 거치며 데이터를 저차원으로 표현한다. 이 과정을 거치면 데이터는 가장 중요한 속성만을 가지게 된다. 이렇게 저차원으로 표현된 데이터를 다시 decoder 부분에서 확장시켜 입력값의 구조로 재구성하고 출력값으로 반환한다.<BR/><BR/><BR/><BR/>
 
 ## GAN
